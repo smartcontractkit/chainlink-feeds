@@ -47,12 +47,6 @@ jobs:
           metrics-job-name: ci-lint
           gc-basic-auth: ${{ secrets.GRAFANA_CLOUD_BASIC_AUTH }}
           gc-host: ${{ secrets.GRAFANA_CLOUD_HOST }}
-          # aws inputs
-          aws-region: ${{ secrets.AWS_REGION }}
-          # gati inputs
-          use-gati: "true"
-          aws-role-arn-gati: ${{ secrets.AWS_OIDC_IAM_ROLE_ARN_GATI }}
-          aws-lambda-url-gati: ${{ secrets.AWS_LAMBDA_URL_GATI }}
           # env inputs
           use-env-files: "true"
           env-files: ./tools/env/ci.env
@@ -77,12 +71,6 @@ jobs:
           metrics-job-name: ci-test
           gc-basic-auth: ${{ secrets.GRAFANA_CLOUD_BASIC_AUTH }}
           gc-host: ${{ secrets.GRAFANA_CLOUD_HOST }}
-          # aws inputs
-          aws-region: ${{ secrets.AWS_REGION }}
-          # gati inputs
-          use-gati: "true"
-          aws-role-arn-gati: ${{ secrets.AWS_OIDC_IAM_ROLE_ARN_GATI }}
-          aws-lambda-url-gati: ${{ secrets.AWS_LAMBDA_URL_GATI }}
           # docker inputs
           use-docker-compose: "true"
           docker-compose-workdir: ./tools/docker/setup-postgres
