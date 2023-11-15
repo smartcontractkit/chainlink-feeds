@@ -24,12 +24,6 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
-      # Avoid checking against the "Version Packages" PR from changesets itself.
-      - name: Check for changesets on PR
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'changeset-release/master'
-        uses: smartcontractkit/.github/actions/guard-from-missing-changesets@main
-        with:
-          trunk-branch: "origin/master"
       - name: Set matrix packages
         id: set-matrix-packages
         shell: bash
