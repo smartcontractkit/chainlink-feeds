@@ -61,7 +61,7 @@ jobs:
           # go inputs
           use-go-cache: true
           go-cache-dep-path: "**/go.sum"
-          go-version-file: go.work
+          go-version-file: go.mod
           golangci-lint-version: "v1.53.2"
           golangci-lint-args: --out-format checkstyle:golangci-lint-report.xml ${{ needs.init.outputs.lint_args_packages }}
 
@@ -99,7 +99,7 @@ jobs:
           # go inputs
           use-go-cache: "true"
           go-cache-dep-path: "**/go.sum"
-          go-version-file: go.work
+          go-version-file: go.mod
           go-test-cmd: make test-ci
 
   ci-build-artifacts-matrix:
@@ -129,7 +129,7 @@ jobs:
           aws-role-arn: ${{ secrets.AWS_OIDC_IAM_ROLE_ARN }}
           aws-account-number: ${{ secrets.AWS_ACCOUNT_NUMBER_PROD }}
           # golang inputs
-          go-version-file: go.work
+          go-version-file: go.mod
           # goreleaser inputs
           goreleaser-args: "--nightly --config ./${{ matrix.package }}/.goreleaser.ci.yaml"
           goreleaser-dist: goreleaser-pro
