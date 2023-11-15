@@ -128,10 +128,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-role-arn: ${{ secrets.AWS_OIDC_IAM_ROLE_ARN }}
           aws-account-number: ${{ secrets.AWS_ACCOUNT_NUMBER_PROD }}
-          # gati inputs
-          use-gati: "true"
-          aws-role-arn-gati: ${{ secrets.AWS_OIDC_IAM_ROLE_ARN_GATI }}
-          aws-lambda-url-gati: ${{ secrets.AWS_LAMBDA_URL_GATI }}
           # golang inputs
           go-version-file: go.work
           # goreleaser inputs
