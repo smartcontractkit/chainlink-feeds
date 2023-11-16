@@ -7,11 +7,11 @@ build:
 
 .PHONY: test
 test:
-	go test $(addsuffix /...,$(addprefix ./))
+	go test /...
 
 .PHONY: test-ci
 test-ci:
-	go test $(addsuffix /...,$(addprefix ./)) -covermode=atomic -coverpkg=./... -coverprofile=./coverage.txt -json | tee output.txt
+	go test /... -covermode=atomic -coverpkg=./... -coverprofile=./coverage.txt -json | tee output.txt
 
 .PHONY: lint
 lint:
