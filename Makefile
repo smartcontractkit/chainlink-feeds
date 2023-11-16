@@ -7,15 +7,15 @@ build:
 
 .PHONY: test
 test:
-	go test /...
+	go test ./...
 
 .PHONY: test-ci
 test-ci:
-	go test /... -covermode=atomic -coverpkg=./... -coverprofile=./coverage.txt -json | tee output.txt
+	go test ./... -covermode=atomic -coverpkg=./... -coverprofile=./coverage.txt -json | tee output.txt
 
 .PHONY: lint
 lint:
-	golangci-lint run $(addsuffix /...)
+	golangci-lint run ./...
 
 .PHONY: tidy
 tidy:
