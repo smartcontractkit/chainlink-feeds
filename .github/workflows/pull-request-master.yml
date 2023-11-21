@@ -63,7 +63,7 @@ jobs:
           go-cache-dep-path: "**/go.sum"
           go-version-file: go.mod
           golangci-lint-version: "v1.53.2"
-          golangci-lint-args: --out-format checkstyle:golangci-lint-report.xml ${{ needs.init.outputs.lint_args_packages }}
+          golangci-lint-args: --out-format colored-line-number,checkstyle:golangci-lint-report.xml
 
   ci-lint-misc:
     runs-on: ubuntu-latest
@@ -131,7 +131,7 @@ jobs:
           # golang inputs
           go-version-file: go.mod
           # goreleaser inputs
-          goreleaser-args: "--nightly --config ./${{ matrix.package }}/.goreleaser.ci.yaml"
+          goreleaser-args: "--nightly --config ./.goreleaser.ci.yaml"
           goreleaser-dist: goreleaser-pro
           goreleaser-key: ${{ secrets.GORELEASER_KEY }}
           # zig inputs
