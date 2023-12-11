@@ -27,6 +27,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
+
 	factory := median.NumericalMedianFactory{
 		DataSource:                dataSource,
 		JuelsPerFeeCoinDataSource: juelsPerFeeCoin,
@@ -38,13 +39,24 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 			}
 		}),
 		OnchainConfigCodec: provider.OnchainConfigCodec(),
-		ReportCodec:        provider.ReportCodec(),
 	}
+
 	if cr := provider.ChainReader(); cr != nil {
 		factory.ContractTransmitter = &chainReaderContract{cr, types.BoundContract{Name: "median"}}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
+
+	if codec := provider.Codec(); codec != nil {
+		var err error
+		if factory.ReportCodec, err = newReportCodec(codec); err != nil {
+			return nil, err
+		}
+	} else {
+		lggr.Warn("No codec provided, defaulting back to median specific ReportCodec")
+		factory.ReportCodec = provider.ReportCodec()
+	}
+
 	s := &reportingPluginFactoryService{lggr: logger.Named(lggr, "ReportingPluginFactory"), ReportingPluginFactory: factory}
 
 	p.SubService(s)
