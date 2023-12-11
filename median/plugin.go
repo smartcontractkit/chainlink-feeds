@@ -2,6 +2,7 @@ package median
 
 import (
 	"context"
+	"errors"
 	"math/big"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
 )
+
+const contractName = "median"
 
 type Plugin struct {
 	loop.Plugin
@@ -27,6 +30,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
+
 	factory := median.NumericalMedianFactory{
 		DataSource:                dataSource,
 		JuelsPerFeeCoinDataSource: juelsPerFeeCoin,
@@ -38,13 +42,24 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 			}
 		}),
 		OnchainConfigCodec: provider.OnchainConfigCodec(),
-		ReportCodec:        provider.ReportCodec(),
 	}
+
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{cr, types.BoundContract{Name: "median"}}
+		factory.ContractTransmitter = &chainReaderContract{chainReader: cr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
+
+	if codec := provider.Codec(); codec != nil {
+		var err error
+		if factory.ReportCodec, err = newReportCodec(codec); err != nil {
+			return nil, err
+		}
+	} else {
+		lggr.Warn("No codec provided, defaulting back to median specific ReportCodec")
+		factory.ReportCodec = provider.ReportCodec()
+	}
+
 	s := &reportingPluginFactoryService{lggr: logger.Named(lggr, "ReportingPluginFactory"), ReportingPluginFactory: factory}
 
 	p.SubService(s)
@@ -75,7 +90,6 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 // chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
 type chainReaderContract struct {
 	chainReader types.ChainReader
-	contract    types.BoundContract
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -95,9 +109,15 @@ type latestRoundRequested struct {
 func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.chainReader.GetLatestValue(ctx, c.contract, "LatestTransmissionDetails", nil, &resp)
-	if err != nil {
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+	if err != nil && !errors.Is(err, types.ErrNotFound) {
 		return
+	}
+
+	// Depending on if there is a LatestAnswer or not, and the implementation of the ChainReader,
+	// it's possible that this will be unset. The desired behaviour in that case is to have a zero value.
+	if resp.LatestAnswer == nil {
+		resp.LatestAnswer = new(big.Int)
 	}
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, resp.LatestAnswer, resp.LatestTimestamp, nil
@@ -106,8 +126,8 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, c.contract, "LatestRoundReported", map[string]any{"lookback": lookback}, &resp)
-	if err != nil {
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
+	if err != nil && !errors.Is(err, types.ErrNotFound) {
 		return
 	}
 
