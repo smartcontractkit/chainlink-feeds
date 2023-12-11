@@ -4,6 +4,8 @@ import (
 	"github.com/hashicorp/go-plugin"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/loop"
+	"github.com/smartcontractkit/chainlink-common/pkg/loop/reportingplugins"
+	"github.com/smartcontractkit/chainlink-common/pkg/types"
 
 	"github.com/smartcontractkit/chainlink-feeds/median"
 )
@@ -32,6 +34,14 @@ func main() {
 				BrokerConfig: loop.BrokerConfig{
 					StopCh:   stop,
 					Logger:   s.Logger,
+					GRPCOpts: s.GRPCOpts,
+				},
+			},
+			reportingplugins.PluginServiceName: &reportingplugins.GRPCService[types.MedianProvider]{
+				PluginServer: p,
+				BrokerConfig: loop.BrokerConfig{
+					Logger:   s.Logger,
+					StopCh:   stop,
 					GRPCOpts: s.GRPCOpts,
 				},
 			},
