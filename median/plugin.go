@@ -2,6 +2,7 @@ package median
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -57,6 +58,8 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 		lggr.Warn("!!!!!!!!\nNo codec provided, defaulting back to median specific ReportCodec\n!!!!!!!!")
 		factory.ReportCodec = provider.ReportCodec()
 	}
+
+	factory.ReportCodec = &wrapper{rc: factory.ReportCodec}
 
 	s := &reportingPluginFactoryService{lggr: logger.Named(lggr, "ReportingPluginFactory"), ReportingPluginFactory: factory}
 
@@ -125,4 +128,23 @@ func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 	}
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, nil
+}
+
+type wrapper struct {
+	rc median.ReportCodec
+}
+
+func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
+	fmt.Printf("Build report called on wrapper %T", w.rc)
+	return w.rc.BuildReport(observations)
+}
+
+func (w *wrapper) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
+	fmt.Printf("Median from report called on wrapper %T", w.rc)
+	return w.rc.MedianFromReport(report)
+}
+
+func (w *wrapper) MaxReportLength(n int) (int, error) {
+	fmt.Printf("Max report length called on wrapper %T", w.rc)
+	return w.rc.MaxReportLength(n)
 }
