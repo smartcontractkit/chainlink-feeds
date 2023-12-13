@@ -3,6 +3,7 @@ package median
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
@@ -26,13 +27,18 @@ type reportCodec struct {
 var _ median.ReportCodec = reportCodec{}
 
 func (r reportCodec) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
+	fmt.Printf("!!!!!!!!\nBuildReport\n!!!!!!!!")
 	agg := aggregate(observations)
-	return r.codec.Encode(context.Background(), agg, typeName)
+	b, err := r.codec.Encode(context.Background(), agg, typeName)
+	fmt.Printf("!!!!!!!!\nBuildReport err: %v\n!!!!!!!!", err)
+	return b, err
 }
 
 func (r reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
+	fmt.Printf("!!!!!!!!\nMedian from report\n!!!!!!!!")
 	agg := &aggregatedAttributedObservation{}
 	if err := r.codec.Decode(context.Background(), report, agg, typeName); err != nil {
+		fmt.Printf("!!!!!!!!\nMedian from report decode err\n%v\n!!!!!!!!", err)
 		return nil, err
 	}
 	medianObservation := len(agg.Observations) / 2
@@ -40,5 +46,7 @@ func (r reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error) 
 }
 
 func (r reportCodec) MaxReportLength(n int) (int, error) {
-	return r.codec.GetMaxDecodingSize(context.Background(), n, typeName)
+	size, err := r.codec.GetMaxDecodingSize(context.Background(), n, typeName)
+	fmt.Printf("!!!!!!!!\nMax report length err\n%v\n!!!!!!!!", err)
+	return size, err
 }

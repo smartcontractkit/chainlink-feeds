@@ -48,12 +48,13 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if codec := provider.Codec(); codec != nil {
+		lggr.Infof("!!!!!!!!\nnew codec in use\n!!!!!!!!")
 		var err error
 		if factory.ReportCodec, err = newReportCodec(codec); err != nil {
 			return nil, err
 		}
 	} else {
-		lggr.Warn("No codec provided, defaulting back to median specific ReportCodec")
+		lggr.Warn("!!!!!!!!\nNo codec provided, defaulting back to median specific ReportCodec\n!!!!!!!!")
 		factory.ReportCodec = provider.ReportCodec()
 	}
 
