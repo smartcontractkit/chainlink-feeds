@@ -15,6 +15,8 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
 )
 
+const contractName = "median"
+
 type Plugin struct {
 	loop.Plugin
 	stop services.StopChan
@@ -43,7 +45,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{cr, types.BoundContract{Name: "median"}}
+		factory.ContractTransmitter = &chainReaderContract{chainReader: cr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -91,7 +93,6 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 // chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
 type chainReaderContract struct {
 	chainReader types.ChainReader
-	contract    types.BoundContract
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -111,7 +112,7 @@ type latestRoundRequested struct {
 func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.chainReader.GetLatestValue(ctx, c.contract.Address, "LatestTransmissionDetails", nil, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
 	if err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, c.contract.Address, "LatestRoundReported", map[string]any{"lookback": lookback}, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundReported", map[string]any{"lookback": lookback}, &resp)
 	if err != nil {
 		return
 	}
