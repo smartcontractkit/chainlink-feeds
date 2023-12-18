@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"runtime"
 	"time"
 
 	"github.com/smartcontractkit/libocr/offchainreporting2/reportingplugin/median"
@@ -136,7 +137,10 @@ type wrapper struct {
 }
 
 func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
-	fmt.Printf("Build report called on wrapper %T", w.rc)
+	b := make([]byte, 2048) // adjust buffer size to be larger than expected stack
+	n := runtime.Stack(b, false)
+	s := string(b[:n])
+	fmt.Printf("Build report called on wrapper %T\n%s\n", w.rc, s)
 	return w.rc.BuildReport(observations)
 }
 
