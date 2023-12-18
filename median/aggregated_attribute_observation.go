@@ -2,6 +2,7 @@ package median
 
 import (
 	"cmp"
+	"fmt"
 	"math/big"
 	"slices"
 	"sort"
@@ -28,6 +29,8 @@ func aggregate(observations []median.ParsedAttributedObservation) *aggregatedAtt
 		return cmp.Compare(a.Timestamp, b.Timestamp)
 	})
 	aggregated.Timestamp = observations[n/2].Timestamp
+
+	fmt.Printf("!!!!! Sorting JuelsPerFeeCoin, observations: %v", observations)
 
 	// get median juelsPerFeeCoin
 	sort.Slice(observations, func(i, j int) bool {

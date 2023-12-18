@@ -123,7 +123,7 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundReported", map[string]any{"lookback": lookback}, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", map[string]any{"lookback": lookback}, &resp)
 	if err != nil {
 		return
 	}
