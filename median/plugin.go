@@ -2,6 +2,7 @@ package median
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"runtime"
@@ -161,7 +162,21 @@ func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation)
 	fmt.Printf("Build report called on wrapper %T\n%s\n", w.rc, s)
 	results, err := w.rc.BuildReport(observations)
 	oldResults, oldErr := w.old.BuildReport(observations)
-	cmpPrint(results, oldResults, err, oldErr, w.lggr)
+	// Can't use cmpPrint here because it takes too long on the slices...
+	if !errors.Is(oldErr, err) {
+		w.lggr.Errorf("!!!!!!!!\nErr diff found:\n%v\n%v\n%s\n!!!!!!!!\n", err, oldErr, s)
+	}
+
+	if len(results) != len(oldResults) {
+		w.lggr.Errorf("!!!!!!!!\nResults len diff found:\n%v\n%v\n%s\n!!!!!!!!\n", len(results), len(oldResults), s)
+	} else {
+		for i := 0; i < len(results); i++ {
+			if results[i] != oldResults[i] {
+				w.lggr.Errorf("!!!!!!!!\nResults diff found:\n%x\n%x\n%v\n%s\n!!!!!!!!\n", results, oldResults, i, s)
+				break
+			}
+		}
+	}
 
 	return results, err
 }
