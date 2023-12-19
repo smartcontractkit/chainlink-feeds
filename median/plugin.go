@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/google/go-cmp/cmp"
 	"github.com/smartcontractkit/libocr/offchainreporting2/reportingplugin/median"
 	ocrtypes "github.com/smartcontractkit/libocr/offchainreporting2plus/types"
 
@@ -47,7 +47,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{chainReader: cr}
+		factory.ContractTransmitter = &chainReaderContract{chainReader: cr, old: provider.MedianContract()}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -63,7 +63,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 		factory.ReportCodec = provider.ReportCodec()
 	}
 
-	factory.ReportCodec = &wrapper{rc: factory.ReportCodec}
+	factory.ReportCodec = &wrapper{rc: factory.ReportCodec, old: provider.ReportCodec()}
 
 	s := &reportingPluginFactoryService{lggr: logger.Named(lggr, "ReportingPluginFactory"), ReportingPluginFactory: factory}
 
@@ -95,7 +95,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 // chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
 type chainReaderContract struct {
 	chainReader types.ChainReader
-	contract    types.BoundContract
+	old         median.MedianContract
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -117,6 +117,12 @@ func (m *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	resp := latestTransmissionDetailsResponse{LatestAnswer: new(big.Int)}
 
 	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+
+	oldResp := latestTransmissionDetailsResponse{}
+	var oldErr error
+	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldResp.LatestAnswer, oldResp.LatestTimestamp, oldErr = m.old.LatestTransmissionDetails(ctx)
+	cmpPrint(resp, oldResp, err, oldErr)
+
 	if err != nil {
 		return
 	}
@@ -128,6 +134,12 @@ func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 	var resp latestRoundRequested
 
 	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", map[string]string{}, &resp)
+
+	var oldResp latestRoundRequested
+	var oldErr error
+	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldErr = m.old.LatestRoundRequested(ctx, lookback)
+	cmpPrint(resp, oldResp, err, oldErr)
+
 	if err != nil {
 		return
 	}
@@ -136,7 +148,8 @@ func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 }
 
 type wrapper struct {
-	rc median.ReportCodec
+	rc  median.ReportCodec
+	old median.ReportCodec
 }
 
 func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
@@ -144,20 +157,42 @@ func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation)
 	n := runtime.Stack(b, false)
 	s := string(b[:n])
 	fmt.Printf("Build report called on wrapper %T\n%s\n", w.rc, s)
-	return w.rc.BuildReport(observations)
+	results, err := w.rc.BuildReport(observations)
+	oldResults, oldErr := w.old.BuildReport(observations)
+	cmpPrint(results, oldResults, err, oldErr)
+
+	return results, err
 }
 
 func (w *wrapper) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
 	fmt.Printf("Median from report called on wrapper %T", w.rc)
-	return w.rc.MedianFromReport(report)
+	results, err := w.rc.MedianFromReport(report)
+
+	oldResults, oldErr := w.old.MedianFromReport(report)
+	cmpPrint(results, oldResults, err, oldErr)
+	return results, err
 }
 
 func (w *wrapper) MaxReportLength(n int) (int, error) {
 	fmt.Printf("Max report length called on wrapper %T", w.rc)
-	return w.rc.MaxReportLength(n)
+	results, err := w.rc.MaxReportLength(n)
+	oldResults, oldErr := w.old.MaxReportLength(n)
+	cmpPrint(results, oldResults, err, oldErr)
+	return results, err
 }
 
-func newChainReaderContract(chainReader types.ChainReader, address common.Address) *chainReaderContract {
-	contract := types.BoundContract{Address: address.String(), Name: contractName, Pending: true}
-	return &chainReaderContract{chainReader, contract}
+func cmpPrint[T any](expected, actual T, expectedErr, actualErr error) {
+	b := make([]byte, 2048) // adjust buffer size to be larger than expected stack
+	n := runtime.Stack(b, false)
+	s := string(b[:n])
+
+	diff := cmp.Diff(expected, actual)
+	if diff != "" {
+		fmt.Printf("!!!!!!!!Diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+	}
+
+	diff = cmp.Diff(expectedErr, actualErr)
+	if diff != "" {
+		fmt.Printf("!!!!!!!!Err diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+	}
 }
