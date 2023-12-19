@@ -47,7 +47,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{chainReader: cr, old: provider.MedianContract()}
+		factory.ContractTransmitter = &chainReaderContract{chainReader: cr, old: provider.MedianContract(), lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -63,7 +63,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 		factory.ReportCodec = provider.ReportCodec()
 	}
 
-	factory.ReportCodec = &wrapper{rc: factory.ReportCodec, old: provider.ReportCodec()}
+	factory.ReportCodec = &wrapper{rc: factory.ReportCodec, old: provider.ReportCodec(), lggr: lggr}
 
 	s := &reportingPluginFactoryService{lggr: logger.Named(lggr, "ReportingPluginFactory"), ReportingPluginFactory: factory}
 
@@ -96,6 +96,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 type chainReaderContract struct {
 	chainReader types.ChainReader
 	old         median.MedianContract
+	lggr        logger.Logger
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -121,7 +122,7 @@ func (m *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	oldResp := latestTransmissionDetailsResponse{}
 	var oldErr error
 	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldResp.LatestAnswer, oldResp.LatestTimestamp, oldErr = m.old.LatestTransmissionDetails(ctx)
-	cmpPrint(resp, oldResp, err, oldErr)
+	cmpPrint(resp, oldResp, err, oldErr, m.lggr)
 
 	if err != nil {
 		return
@@ -138,7 +139,7 @@ func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 	var oldResp latestRoundRequested
 	var oldErr error
 	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldErr = m.old.LatestRoundRequested(ctx, lookback)
-	cmpPrint(resp, oldResp, err, oldErr)
+	cmpPrint(resp, oldResp, err, oldErr, m.lggr)
 
 	if err != nil {
 		return
@@ -148,8 +149,9 @@ func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 }
 
 type wrapper struct {
-	rc  median.ReportCodec
-	old median.ReportCodec
+	rc   median.ReportCodec
+	old  median.ReportCodec
+	lggr logger.Logger
 }
 
 func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
@@ -159,7 +161,7 @@ func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation)
 	fmt.Printf("Build report called on wrapper %T\n%s\n", w.rc, s)
 	results, err := w.rc.BuildReport(observations)
 	oldResults, oldErr := w.old.BuildReport(observations)
-	cmpPrint(results, oldResults, err, oldErr)
+	cmpPrint(results, oldResults, err, oldErr, w.lggr)
 
 	return results, err
 }
@@ -169,7 +171,7 @@ func (w *wrapper) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
 	results, err := w.rc.MedianFromReport(report)
 
 	oldResults, oldErr := w.old.MedianFromReport(report)
-	cmpPrint(results, oldResults, err, oldErr)
+	cmpPrint(results, oldResults, err, oldErr, w.lggr)
 	return results, err
 }
 
@@ -177,11 +179,11 @@ func (w *wrapper) MaxReportLength(n int) (int, error) {
 	fmt.Printf("Max report length called on wrapper %T", w.rc)
 	results, err := w.rc.MaxReportLength(n)
 	oldResults, oldErr := w.old.MaxReportLength(n)
-	cmpPrint(results, oldResults, err, oldErr)
+	cmpPrint(results, oldResults, err, oldErr, w.lggr)
 	return results, err
 }
 
-func cmpPrint[T any](expected, actual T, expectedErr, actualErr error) {
+func cmpPrint[T any](expected, actual T, expectedErr, actualErr error, lggr logger.Logger) {
 	b := make([]byte, 2048) // adjust buffer size to be larger than expected stack
 	n := runtime.Stack(b, false)
 	s := string(b[:n])
@@ -190,17 +192,17 @@ func cmpPrint[T any](expected, actual T, expectedErr, actualErr error) {
 
 	diff := cmp.Diff(expected, actual)
 	if diff != "" {
-		fmt.Printf("!!!!!!!!object diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+		lggr.Errorf("!!!!!!!!\nobject diff found:\n%s\\n%s\n!!!!!!!!", diff, s)
 		same = false
 	}
 
 	diff = cmp.Diff(expectedErr, actualErr)
 	if diff != "" {
-		fmt.Printf("!!!!!!!!Err diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+		lggr.Errorf("!!!!!!!!\nErr diff found:\n%s\n%s\\n!!!!!!!!\n", diff, s)
 		same = false
 	}
 
 	if same {
-		fmt.Printf("!!!!!!!!No diff found\\n!!!!!!!!\n")
+		lggr.Errorf("!!!!!!!!\nNo diff found\n!!!!!!!!\n")
 	}
 }
