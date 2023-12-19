@@ -186,13 +186,21 @@ func cmpPrint[T any](expected, actual T, expectedErr, actualErr error) {
 	n := runtime.Stack(b, false)
 	s := string(b[:n])
 
+	same := true
+
 	diff := cmp.Diff(expected, actual)
 	if diff != "" {
-		fmt.Printf("!!!!!!!!Diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+		fmt.Printf("!!!!!!!!object diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+		same = false
 	}
 
 	diff = cmp.Diff(expectedErr, actualErr)
 	if diff != "" {
 		fmt.Printf("!!!!!!!!Err diff found:\\n%s\\n%s\\n!!!!!!!!\n", diff, s)
+		same = false
+	}
+
+	if same {
+		fmt.Printf("!!!!!!!!No diff found\\n!!!!!!!!\n")
 	}
 }
