@@ -115,15 +115,18 @@ type latestRoundRequested struct {
 }
 
 func (m *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
-	// init the LatestAnswer so that it's not nil if this is the first round
-	resp := latestTransmissionDetailsResponse{LatestAnswer: new(big.Int)}
-
-	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
-
 	oldResp := latestTransmissionDetailsResponse{}
 	var oldErr error
 	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldResp.LatestAnswer, oldResp.LatestTimestamp, oldErr = m.old.LatestTransmissionDetails(ctx)
-	cmpPrint(oldResp, resp, oldErr, err, m.lggr)
+
+	// init the LatestAnswer so that it's not nil if this is the first round
+	resp := latestTransmissionDetailsResponse{LatestAnswer: new(big.Int)}
+	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+	cmpPrint(oldResp, resp, oldErr, err, m.lggr, true)
+
+	oldResp = latestTransmissionDetailsResponse{}
+	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldResp.LatestAnswer, oldResp.LatestTimestamp, oldErr = m.old.LatestTransmissionDetails(ctx)
+	cmpPrint(oldResp, resp, oldErr, err, m.lggr, false)
 
 	if err != nil {
 		return
@@ -135,12 +138,15 @@ func (m *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", map[string]string{}, &resp)
-
 	var oldResp latestRoundRequested
 	var oldErr error
 	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldErr = m.old.LatestRoundRequested(ctx, lookback)
-	cmpPrint(oldResp, resp, oldErr, err, m.lggr)
+
+	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", map[string]string{}, &resp)
+	cmpPrint(oldResp, resp, oldErr, err, m.lggr, true)
+
+	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldErr = m.old.LatestRoundRequested(ctx, lookback)
+	cmpPrint(oldResp, resp, oldErr, err, m.lggr, false)
 
 	if err != nil {
 		return
@@ -160,31 +166,37 @@ func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation)
 	n := runtime.Stack(b, false)
 	s := string(b[:n])
 	fmt.Printf("Build report called on wrapper %T\n%s\n", w.rc, s)
-	results, err := w.rc.BuildReport(observations)
 	oldResults, oldErr := w.old.BuildReport(observations)
-	cmpPrint(oldResults, results, oldErr, err, w.lggr)
+	results, err := w.rc.BuildReport(observations)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr, true)
+	oldResults, oldErr = w.old.BuildReport(observations)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr, false)
 
 	return results, err
 }
 
 func (w *wrapper) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
 	fmt.Printf("Median from report called on wrapper %T", w.rc)
-	results, err := w.rc.MedianFromReport(report)
-
 	oldResults, oldErr := w.old.MedianFromReport(report)
-	cmpPrint(oldResults, results, oldErr, err, w.lggr)
+	results, err := w.rc.MedianFromReport(report)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr, true)
+
+	oldResults, oldErr = w.old.MedianFromReport(report)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr, false)
 	return results, err
 }
 
 func (w *wrapper) MaxReportLength(n int) (int, error) {
 	fmt.Printf("Max report length called on wrapper %T", w.rc)
-	results, err := w.rc.MaxReportLength(n)
 	oldResults, oldErr := w.old.MaxReportLength(n)
-	cmpPrint(oldResults, results, oldErr, err, w.lggr)
+	results, err := w.rc.MaxReportLength(n)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr, true)
+	oldResults, oldErr = w.old.MaxReportLength(n)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr, false)
 	return results, err
 }
 
-func cmpPrint[T any](expected, actual T, expectedErr, actualErr error, lggr logger.Logger) {
+func cmpPrint[T any](expected, actual T, expectedErr, actualErr error, lggr logger.Logger, expectedBefore bool) {
 	b := make([]byte, 2048) // adjust buffer size to be larger than expected stack
 	n := runtime.Stack(b, false)
 	s := string(b[:n])
@@ -197,16 +209,16 @@ func cmpPrint[T any](expected, actual T, expectedErr, actualErr error, lggr logg
 
 	diff := cmp.Diff(expected, actual, opt)
 	if diff != "" {
-		lggr.Errorf("!!!!!!!!\nobject diff found:\n%s\\n%s\n!!!!!!!!", diff, s)
+		lggr.Errorf("!!!!!!!!\nobject diff found:\n%s\n%s\n%v\n!!!!!!!!", diff, s, expectedBefore)
 		same = false
 	}
 
 	if !errors.Is(actualErr, expectedErr) {
-		lggr.Errorf("!!!!!!!!\nErr diff found:\n%s\n%s\\n!!!!!!!!\n", diff, s)
+		lggr.Errorf("!!!!!!!!\nErr diff found:\n%s\n%s\n%v\n!!!!!!!!\n", diff, s, expectedBefore)
 		same = false
 	}
 
 	if same {
-		lggr.Errorf("!!!!!!!!\nNo diff found\n!!!!!!!!\n")
+		lggr.Errorf("!!!!!!!!\nNo diff found\n%v\n!!!!!!!!\n", expectedBefore)
 	}
 }
