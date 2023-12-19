@@ -205,14 +205,17 @@ func cmpPrint[T any](expected, actual T, expectedErr, actualErr error, lggr logg
 
 	same := true
 
-	diff := cmp.Diff(expected, actual)
+	opt := cmp.Comparer(func(x, y *big.Int) bool {
+		return x.Cmp(y) == 0
+	})
+
+	diff := cmp.Diff(expected, actual, opt)
 	if diff != "" {
 		lggr.Errorf("!!!!!!!!\nobject diff found:\n%s\\n%s\n!!!!!!!!", diff, s)
 		same = false
 	}
 
-	diff = cmp.Diff(expectedErr, actualErr)
-	if diff != "" {
+	if !errors.Is(actualErr, expectedErr) {
 		lggr.Errorf("!!!!!!!!\nErr diff found:\n%s\n%s\\n!!!!!!!!\n", diff, s)
 		same = false
 	}
