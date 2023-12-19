@@ -152,7 +152,8 @@ func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 		return
 	}
 
-	return resp.ConfigDigest, resp.Epoch, resp.Round, nil
+	var dnm latestRoundRequested
+	return dnm.ConfigDigest, dnm.Epoch, dnm.Round, nil
 }
 
 type wrapper struct {
