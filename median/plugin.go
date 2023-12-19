@@ -123,7 +123,7 @@ func (m *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	oldResp := latestTransmissionDetailsResponse{}
 	var oldErr error
 	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldResp.LatestAnswer, oldResp.LatestTimestamp, oldErr = m.old.LatestTransmissionDetails(ctx)
-	cmpPrint(resp, oldResp, err, oldErr, m.lggr)
+	cmpPrint(oldResp, resp, oldErr, err, m.lggr)
 
 	if err != nil {
 		return
@@ -140,7 +140,7 @@ func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 	var oldResp latestRoundRequested
 	var oldErr error
 	oldResp.ConfigDigest, oldResp.Epoch, oldResp.Round, oldErr = m.old.LatestRoundRequested(ctx, lookback)
-	cmpPrint(resp, oldResp, err, oldErr, m.lggr)
+	cmpPrint(oldResp, resp, oldErr, err, m.lggr)
 
 	if err != nil {
 		return
@@ -162,21 +162,7 @@ func (w *wrapper) BuildReport(observations []median.ParsedAttributedObservation)
 	fmt.Printf("Build report called on wrapper %T\n%s\n", w.rc, s)
 	results, err := w.rc.BuildReport(observations)
 	oldResults, oldErr := w.old.BuildReport(observations)
-	// Can't use cmpPrint here because it takes too long on the slices...
-	if !errors.Is(oldErr, err) {
-		w.lggr.Errorf("!!!!!!!!\nErr diff found:\n%v\n%v\n%s\n!!!!!!!!\n", err, oldErr, s)
-	}
-
-	if len(results) != len(oldResults) {
-		w.lggr.Errorf("!!!!!!!!\nResults len diff found:\n%v\n%v\n%s\n!!!!!!!!\n", len(results), len(oldResults), s)
-	} else {
-		for i := 0; i < len(results); i++ {
-			if results[i] != oldResults[i] {
-				w.lggr.Errorf("!!!!!!!!\nResults diff found:\n%x\n%x\n%v\n%s\n!!!!!!!!\n", results, oldResults, i, s)
-				break
-			}
-		}
-	}
+	cmpPrint(oldResults, results, oldErr, err, w.lggr)
 
 	return results, err
 }
@@ -186,7 +172,7 @@ func (w *wrapper) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
 	results, err := w.rc.MedianFromReport(report)
 
 	oldResults, oldErr := w.old.MedianFromReport(report)
-	cmpPrint(results, oldResults, err, oldErr, w.lggr)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr)
 	return results, err
 }
 
@@ -194,7 +180,7 @@ func (w *wrapper) MaxReportLength(n int) (int, error) {
 	fmt.Printf("Max report length called on wrapper %T", w.rc)
 	results, err := w.rc.MaxReportLength(n)
 	oldResults, oldErr := w.old.MaxReportLength(n)
-	cmpPrint(results, oldResults, err, oldErr, w.lggr)
+	cmpPrint(oldResults, results, oldErr, err, w.lggr)
 	return results, err
 }
 
