@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/smartcontractkit/libocr/offchainreporting2/reportingplugin/median"
 	ocrtypes "github.com/smartcontractkit/libocr/offchainreporting2plus/types"
 
@@ -94,6 +95,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 // chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
 type chainReaderContract struct {
 	chainReader types.ChainReader
+	contract    types.BoundContract
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -110,10 +112,11 @@ type latestRoundRequested struct {
 	Round        uint8
 }
 
-func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
-	var resp latestTransmissionDetailsResponse
+func (m *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
+	// init the LatestAnswer so that it's not nil if this is the first round
+	resp := latestTransmissionDetailsResponse{LatestAnswer: new(big.Int)}
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
 	if err != nil {
 		return
 	}
@@ -121,10 +124,10 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	return resp.ConfigDigest, resp.Epoch, resp.Round, resp.LatestAnswer, resp.LatestTimestamp, nil
 }
 
-func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
+func (m *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", map[string]any{"lookback": lookback}, &resp)
+	err = m.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", map[string]string{}, &resp)
 	if err != nil {
 		return
 	}
@@ -152,4 +155,9 @@ func (w *wrapper) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
 func (w *wrapper) MaxReportLength(n int) (int, error) {
 	fmt.Printf("Max report length called on wrapper %T", w.rc)
 	return w.rc.MaxReportLength(n)
+}
+
+func newChainReaderContract(chainReader types.ChainReader, address common.Address) *chainReaderContract {
+	contract := types.BoundContract{Address: address.String(), Name: contractName, Pending: true}
+	return &chainReaderContract{chainReader, contract}
 }
