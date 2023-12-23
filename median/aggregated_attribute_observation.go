@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"math/big"
 	"slices"
-	"sort"
 
 	"github.com/smartcontractkit/libocr/commontypes"
 	"github.com/smartcontractkit/libocr/offchainreporting2/reportingplugin/median"
@@ -29,15 +28,13 @@ func aggregate(observations []median.ParsedAttributedObservation) *aggregatedAtt
 	})
 	aggregated.Timestamp = observations[n/2].Timestamp
 
-	// get median juelsPerFeeCoin
-	sort.Slice(observations, func(i, j int) bool {
-		return observations[i].JuelsPerFeeCoin.Cmp(observations[j].JuelsPerFeeCoin) < 0
+	slices.SortFunc(observations, func(a, b median.ParsedAttributedObservation) int {
+		return a.JuelsPerFeeCoin.Cmp(b.JuelsPerFeeCoin)
 	})
 	aggregated.JuelsPerFeeCoin = observations[n/2].JuelsPerFeeCoin
 
-	// sort by values
-	sort.Slice(observations, func(i, j int) bool {
-		return observations[i].Value.Cmp(observations[j].Value) < 0
+	slices.SortFunc(observations, func(a, b median.ParsedAttributedObservation) int {
+		return a.Value.Cmp(b.Value)
 	})
 
 	for i, o := range observations {

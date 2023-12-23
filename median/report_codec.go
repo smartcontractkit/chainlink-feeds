@@ -24,18 +24,17 @@ type reportCodec struct {
 	codec types.Codec
 }
 
-var _ median.ReportCodec = reportCodec{}
+var _ median.ReportCodec = &reportCodec{}
 
-func (r reportCodec) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
+func (r *reportCodec) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
 	if len(observations) == 0 {
 		return nil, fmt.Errorf("cannot build report from empty attributed observations")
 	}
 
-	agg := aggregate(observations)
-	return r.codec.Encode(context.Background(), agg, typeName)
+	return r.codec.Encode(context.Background(), aggregate(observations), typeName)
 }
 
-func (r reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
+func (r *reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error) {
 	agg := &aggregatedAttributedObservation{}
 	if err := r.codec.Decode(context.Background(), report, agg, typeName); err != nil {
 		return nil, err
@@ -44,6 +43,6 @@ func (r reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error) 
 	return agg.Observations[medianObservation], nil
 }
 
-func (r reportCodec) MaxReportLength(n int) (int, error) {
+func (r *reportCodec) MaxReportLength(n int) (int, error) {
 	return r.codec.GetMaxDecodingSize(context.Background(), n, typeName)
 }

@@ -45,7 +45,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{chainReader: cr}
+		factory.ContractTransmitter = &chainReaderContract{chainReader: cr, lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -90,6 +90,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 // chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
 type chainReaderContract struct {
 	chainReader types.ChainReader
+	lggr        logger.Logger
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -110,8 +111,12 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	var resp latestTransmissionDetailsResponse
 
 	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
-	if err != nil && !errors.Is(err, types.ErrNotFound) {
-		return
+	if err != nil {
+		if errors.Is(err, types.ErrNotFound) {
+			c.lggr.Warn("LatestTransmissionDetails not found")
+		} else {
+			return
+		}
 	}
 
 	// Depending on if there is a LatestAnswer or not, and the implementation of the ChainReader,
@@ -127,8 +132,12 @@ func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 	var resp latestRoundRequested
 
 	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
-	if err != nil && !errors.Is(err, types.ErrNotFound) {
-		return
+	if err != nil {
+		if errors.Is(err, types.ErrNotFound) {
+			c.lggr.Warn("LatestRoundRequested not found")
+		} else {
+			return
+		}
 	}
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, nil
