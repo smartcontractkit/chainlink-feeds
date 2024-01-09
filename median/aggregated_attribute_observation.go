@@ -19,7 +19,7 @@ type aggregatedAttributedObservation struct {
 func aggregate(observations []median.ParsedAttributedObservation) *aggregatedAttributedObservation {
 	// defensive copy
 	n := len(observations)
-	observations = append([]median.ParsedAttributedObservation{}, observations...)
+	observations = slices.Clone(observations)
 
 	aggregated := &aggregatedAttributedObservation{Observations: make([]*big.Int, len(observations))}
 

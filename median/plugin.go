@@ -113,6 +113,9 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
 	if err != nil {
 		if errors.Is(err, types.ErrNotFound) {
+			// If there's nothing transmitted yet, an implementation will not have emitted an event,
+			// or may not find details of a latest transmission on-chain if it's a function call.
+			// A zeroed out latestTransmissionDetailsResponse tells later parts of the system that there's no data yet.
 			c.lggr.Warn("LatestTransmissionDetails not found")
 		} else {
 			return
@@ -134,6 +137,9 @@ func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback
 	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
 	if err != nil {
 		if errors.Is(err, types.ErrNotFound) {
+			// If there's nothing on-chain yet, an implementation will not have emitted an event,
+			// or may not find details of a latest transmission on-chain if it's a function call.
+			// A zeroed out LatestRoundRequested tells later parts of the system that there's no data yet.
 			c.lggr.Warn("LatestRoundRequested not found")
 		} else {
 			return
