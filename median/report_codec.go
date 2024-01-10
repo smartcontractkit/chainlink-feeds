@@ -45,10 +45,7 @@ func (r *reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error)
 		return nil, err
 	}
 	observations := make([]*big.Int, len(agg.Observations))
-	for i, o := range agg.Observations {
-		observations[i] = o
-	}
-	fmt.Printf("observations: %v\n", observations)
+	copy(observations, agg.Observations)
 	medianObservation := len(agg.Observations) / 2
 	return agg.Observations[medianObservation], nil
 }
