@@ -27,6 +27,11 @@ type reportCodec struct {
 var _ median.ReportCodec = &reportCodec{}
 
 func (r *reportCodec) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
+	values := make([]*big.Int, len(observations))
+	for i, o := range observations {
+		values[i] = o.Value
+	}
+	fmt.Printf("values: %v\n", values)
 	if len(observations) == 0 {
 		return nil, fmt.Errorf("cannot build report from empty attributed observations")
 	}
@@ -39,6 +44,11 @@ func (r *reportCodec) MedianFromReport(report ocrtypes.Report) (*big.Int, error)
 	if err := r.codec.Decode(context.Background(), report, agg, typeName); err != nil {
 		return nil, err
 	}
+	observations := make([]*big.Int, len(agg.Observations))
+	for i, o := range agg.Observations {
+		observations[i] = o
+	}
+	fmt.Printf("observations: %v\n", observations)
 	medianObservation := len(agg.Observations) / 2
 	return agg.Observations[medianObservation], nil
 }

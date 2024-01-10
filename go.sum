@@ -204,6 +204,8 @@ github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjR
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/smartcontractkit/chainlink-common v0.1.7-0.20240109222055-f385b4fa6457 h1:bgF5Df5ClSxkc0S3posRfgLxgrj1iE+vkPcsjyvKqBw=
 github.com/smartcontractkit/chainlink-common v0.1.7-0.20240109222055-f385b4fa6457/go.mod h1:f+0ei9N4PlTJHu7pbGzEjTnBUr45syPdGFu5+31lS5Q=
+github.com/smartcontractkit/chainlink-common v0.1.7-0.20240110155415-407896b07206 h1:CfKu1c/DBx5qi1lFC9e/aVWwO0IyWKw2poBQR2VflnA=
+github.com/smartcontractkit/chainlink-common v0.1.7-0.20240110155415-407896b07206/go.mod h1:f+0ei9N4PlTJHu7pbGzEjTnBUr45syPdGFu5+31lS5Q=
 github.com/smartcontractkit/go-plugin v0.0.0-20231003134350-e49dad63b306 h1:ko88+ZznniNJZbZPWAvHQU8SwKAdHngdDZ+pvVgB5ss=
 github.com/smartcontractkit/go-plugin v0.0.0-20231003134350-e49dad63b306/go.mod h1:w1sAEES3g3PuV/RzUrgow20W2uErMly84hhD3um1WL4=
 github.com/smartcontractkit/grpc-proxy v0.0.0-20230731113816-f1be6620749f h1:hgJif132UCdjo8u43i7iPN1/MFnu49hv7lFGFftCHKU=
