@@ -98,3 +98,45 @@ jobs:
           # sonarqube inputs
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
+
+  cd-release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      changesets_published: ${{ steps.cd-release.outputs.published }}
+      changesets_publishedPackages: ${{ steps.cd-release.outputs.publishedPackages }}
+    steps:
+      - name: cd-release
+        id: cd-release
+        uses: smartcontractkit/.github/actions/cicd-changesets@c5b65fcfe12a5a14b60b03605748af0b0c6cfbea # cicd-changesets@0.2.0
+        with:
+          # general inputs
+          # TODO update the name
+          git-user: app-token-issuer-plugins[bot]
+          git-email: app-token-issuer-plugins[bot]@users.noreply.github.com
+          pnpm-use-cache: false
+          # aws inputs
+          # TODO create GATI and secrets
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-role-arn: ${{ secrets.AWS_ROLE_ARN_GATI_CHANGESETS }}
+          aws-lambda-url: ${{ secrets.AWS_LAMBDA_URL_GATI }}
+
+  cicd-build-publish-artifacts-release:
+    # Call push-tag-release for median@7.7.7
+    name: Call push-tag-release for ${{ matrix.package.name }}@${{ matrix.package.version }}
+    if: needs.cd-release.outputs.changesets_published == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.cd-release.outputs.changesets_publishedPackages) }}
+    permissions:
+      id-token: write
+      contents: write
+      actions: read
+    needs: [cd-release]
+    uses: ./.github/workflows/push-tag-release.yml
+    secrets: inherit
+    with:
+      tag: "${{ matrix.package.name }}@${{ matrix.package.version }}"

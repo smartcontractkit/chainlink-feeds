@@ -1,0 +1,11 @@
+{
+  "name": "median",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "libs": "workspace:*"
+  },
+  "author": "",
+  "license": "UNLICENSED"
+}
