@@ -129,7 +129,7 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 		resp.LatestAnswer = new(big.Int)
 	}
 
-	c.lggr.Info(fmt.Sprintf("LatestTransmissionDetails: %v\n Answer: %v", resp, resp.LatestAnswer.String()))
+	c.lggr.Info(fmt.Sprintf("RYAN: LatestTransmissionDetails: %v\n Answer: %v", resp, resp.LatestAnswer.String()))
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, resp.LatestAnswer, resp.LatestTimestamp, nil
 }
