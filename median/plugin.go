@@ -3,6 +3,7 @@ package median
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -127,6 +128,8 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	if resp.LatestAnswer == nil {
 		resp.LatestAnswer = new(big.Int)
 	}
+
+	c.lggr.Info(fmt.Sprintf("LatestTransmissionDetails: %v\n Answer: %v", resp, resp.LatestAnswer.String()))
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, resp.LatestAnswer, resp.LatestTimestamp, nil
 }
