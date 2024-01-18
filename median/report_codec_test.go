@@ -50,103 +50,104 @@ func TestReportCodec(t *testing.T) {
 
 	anyError := errors.New("nope not today")
 
-	t.Run("newReportCodec returns error if codec is nil", func(t *testing.T) {
-		_, err := newReportCodec(nil)
-		assert.Error(t, err)
-	})
-
 	t.Run("BuildReport builds the type and delegates to generic codec", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
-			t:        t,
-			expected: &aggReports,
-			result:   anyEncodedReport,
-		})
-		require.NoError(t, err)
+		rc := reportCodec{
+			codec: &testCodec{
+				t:        t,
+				expected: &aggReports,
+				result:   anyEncodedReport,
+			},
+		}
 
-		encoded, err := reportCodec.BuildReport(anyReports)
+		encoded, err := rc.BuildReport(anyReports)
 		require.NoError(t, err)
 		assert.Equal(t, types.Report(anyEncodedReport), encoded)
 	})
 
 	t.Run("BuildReport returns error if there are no reports", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
-			t:        t,
-			expected: &aggReports,
-			result:   anyEncodedReport,
-		})
-		require.NoError(t, err)
+		rc := reportCodec{
+			codec: &testCodec{
+				t:        t,
+				expected: &aggReports,
+				result:   anyEncodedReport,
+			},
+		}
 
-		_, err = reportCodec.BuildReport(nil)
+		_, err := rc.BuildReport(nil)
 		assert.Error(t, err)
 
-		_, err = reportCodec.BuildReport([]median.ParsedAttributedObservation{})
+		_, err = rc.BuildReport([]median.ParsedAttributedObservation{})
 		assert.Error(t, err)
 	})
 
 	t.Run("BuildReport returns error if codec returns error", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
-			t:        t,
-			expected: &aggReports,
-			result:   anyEncodedReport,
-			err:      anyError,
-		})
-		require.NoError(t, err)
+		rc := reportCodec{
+			&testCodec{
+				t:        t,
+				expected: &aggReports,
+				result:   anyEncodedReport,
+				err:      anyError,
+			},
+		}
 
-		_, err = reportCodec.BuildReport(anyReports)
+		_, err := rc.BuildReport(anyReports)
 		assert.Equal(t, anyError, err)
 	})
 
 	t.Run("MedianFromReport delegates to codec and gets the median", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
-			t:        t,
-			expected: anyEncodedReport,
-			result:   aggReports,
-		})
-		require.NoError(t, err)
+		rc := reportCodec{
+			&testCodec{
+				t:        t,
+				expected: anyEncodedReport,
+				result:   aggReports,
+			},
+		}
 
-		medianVal, err := reportCodec.MedianFromReport(anyEncodedReport)
+		medianVal, err := rc.MedianFromReport(anyEncodedReport)
 		require.NoError(t, err)
 		assert.Equal(t, big.NewInt(250), medianVal)
 	})
 
 	t.Run("MedianFromReport returns error if codec returns error", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
-			t:        t,
-			expected: anyEncodedReport,
-			result:   aggReports,
-			err:      anyError,
-		})
-		require.NoError(t, err)
+		rc := reportCodec{
+			&testCodec{
+				t:        t,
+				expected: anyEncodedReport,
+				result:   aggReports,
+				err:      anyError,
+			},
+		}
 
-		_, err = reportCodec.MedianFromReport(anyEncodedReport)
+		_, err := rc.MedianFromReport(anyEncodedReport)
 		assert.Equal(t, anyError, err)
 	})
 
 	anyN := 10
 	anyLen := 200
 	t.Run("MaxReportLength delegates to codec", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
-			t:        t,
-			expected: anyN,
-			result:   anyLen,
-		})
-		require.NoError(t, err)
+		rc := reportCodec{
+			&testCodec{
+				t:        t,
+				expected: anyN,
+				result:   anyLen,
+			},
+		}
 
-		length, err := reportCodec.MaxReportLength(anyN)
+		length, err := rc.MaxReportLength(anyN)
 		require.NoError(t, err)
 		assert.Equal(t, anyLen, length)
 	})
 
 	t.Run("MaxReportLength returns error if codec returns error", func(t *testing.T) {
-		reportCodec, err := newReportCodec(&testCodec{
+		rc := reportCodec{&testCodec{
 			t:        t,
 			expected: 10,
 			result:   anyLen,
 			err:      anyError,
-		})
-		require.NoError(t, err)
+		},
+		}
 
-		_, err = reportCodec.MaxReportLength(10)
+		_, err := rc.MaxReportLength(10)
 		assert.Equal(t, anyError, err)
 	})
 }

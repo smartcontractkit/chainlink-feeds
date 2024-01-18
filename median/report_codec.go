@@ -2,7 +2,6 @@ package median
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/big"
 
@@ -12,13 +11,6 @@ import (
 )
 
 const typeName = "MedianReport"
-
-func newReportCodec(codec types.Codec) (median.ReportCodec, error) {
-	if codec == nil {
-		return nil, errors.New("codec cannot be nil")
-	}
-	return &reportCodec{codec: codec}, nil
-}
 
 type reportCodec struct {
 	codec types.Codec
