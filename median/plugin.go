@@ -2,6 +2,7 @@ package median
 
 import (
 	"context"
+	"errors"
 	"math/big"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
 )
+
+const contractName = "median"
 
 type Plugin struct {
 	loop.Plugin
@@ -27,6 +30,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
+
 	factory := median.NumericalMedianFactory{
 		DataSource:                dataSource,
 		JuelsPerFeeCoinDataSource: juelsPerFeeCoin,
@@ -38,13 +42,21 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 			}
 		}),
 		OnchainConfigCodec: provider.OnchainConfigCodec(),
-		ReportCodec:        provider.ReportCodec(),
 	}
+
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{cr, types.BoundContract{Name: "median"}}
+		factory.ContractTransmitter = &chainReaderContract{chainReader: cr, lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
+
+	if codec := provider.Codec(); codec != nil {
+		factory.ReportCodec = &reportCodec{codec: codec}
+	} else {
+		lggr.Info("No codec provided, defaulting back to median specific ReportCodec")
+		factory.ReportCodec = provider.ReportCodec()
+	}
+
 	s := &reportingPluginFactoryService{lggr: logger.Named(lggr, "ReportingPluginFactory"), ReportingPluginFactory: factory}
 
 	p.SubService(s)
@@ -75,7 +87,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 // chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
 type chainReaderContract struct {
 	chainReader types.ChainReader
-	contract    types.BoundContract
+	lggr        logger.Logger
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -95,9 +107,22 @@ type latestRoundRequested struct {
 func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.chainReader.GetLatestValue(ctx, c.contract, "LatestTransmissionDetails", nil, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
 	if err != nil {
-		return
+		if errors.Is(err, types.ErrNotFound) {
+			// If there's nothing transmitted yet, an implementation will not have emitted an event,
+			// or may not find details of a latest transmission on-chain if it's a function call.
+			// A zeroed out latestTransmissionDetailsResponse tells later parts of the system that there's no data yet.
+			c.lggr.Warn("LatestTransmissionDetails not found", "err", err)
+		} else {
+			return
+		}
+	}
+
+	// Depending on if there is a LatestAnswer or not, and the implementation of the ChainReader,
+	// it's possible that this will be unset. The desired behaviour in that case is to have a zero value.
+	if resp.LatestAnswer == nil {
+		resp.LatestAnswer = new(big.Int)
 	}
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, resp.LatestAnswer, resp.LatestTimestamp, nil
@@ -106,9 +131,16 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, c.contract, "LatestRoundReported", map[string]any{"lookback": lookback}, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
 	if err != nil {
-		return
+		if errors.Is(err, types.ErrNotFound) {
+			// If there's nothing on-chain yet, an implementation will not have emitted an event,
+			// or may not find details of a latest transmission on-chain if it's a function call.
+			// A zeroed out LatestRoundRequested tells later parts of the system that there's no data yet.
+			c.lggr.Warn("LatestRoundRequested not found", "err", err)
+		} else {
+			return
+		}
 	}
 
 	return resp.ConfigDigest, resp.Epoch, resp.Round, nil
