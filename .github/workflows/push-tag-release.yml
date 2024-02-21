@@ -85,7 +85,7 @@ jobs:
           aws-role-arn-gati: ${{ secrets.AWS_OIDC_CHAINLINK_FEEDS_CI_CHANGESET_TOKEN_ISSUER_ROLE_ARN }}
           aws-lambda-url-gati: ${{ secrets.AWS_FOUNDATIONS_GATI_URL }}
           # golang inputs
-          go-version-file: go.work
+          go-version-file: go.mod
           # goreleaser inputs
           goreleaser-args: "--config ./${{ needs.check-tags.outputs.tag-name }}/.goreleaser.ci.yaml"
           goreleaser-dist: goreleaser-pro
