@@ -3,8 +3,8 @@ includes:
   - from_file:
       path: ./.goreleaser-template.yaml
 
-project_name: chainlink-feeds
+project_name: median
 
 monorepo:
-  tag_prefix: chainlink-feeds@
-  dir: chainlink-feeds
+  tag_prefix: median@
+  dir: median
