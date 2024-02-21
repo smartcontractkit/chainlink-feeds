@@ -6,6 +6,10 @@
       "repo": "smartcontractkit/mercury-pipeline"
     }
   ],
+  "privatePackages": {
+    "version": true,
+    "tag": true
+  },
   "commit": false,
   "fixed": [],
   "linked": [],
