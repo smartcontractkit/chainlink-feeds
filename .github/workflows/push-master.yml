@@ -40,7 +40,7 @@ jobs:
       actions: read
     steps:
       - name: ci-lint
-        uses: smartcontractkit/.github/actions/ci-lint-go@9e7cc0779934cae4a9028b8588c9adb64d8ce68c # ci-lint-go@0.1.0
+        uses: smartcontractkit/.github/actions/ci-lint-go@f94f14f46f7b3c51c49bffbea420edd2f01134dc # ci-lint-go@0.2.0
         with:
           # grafana inputs
           metrics-job-name: ci-lint
@@ -121,6 +121,8 @@ jobs:
           aws-lambda-url: ${{ secrets.AWS_FOUNDATIONS_GATI_URL }}
           # grafana inputs
           metrics-job-name: cd-release
+          gc-basic-auth: ${{ secrets.GRAFANA_CLOUD_BASIC_AUTH }}
+          gc-host: ${{ secrets.GRAFANA_CLOUD_HOST }}
 
   cicd-build-publish-artifacts-release:
     # Call push-tag-release for median@7.7.7
