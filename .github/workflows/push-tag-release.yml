@@ -55,7 +55,6 @@ jobs:
           tag-ref: ${{ inputs.tag || github.ref_name }}
 
   cicd-build-publish-artifacts-release:
-    # Publish Producer:0.9.13 Image
     name: Publish ${{ needs.check-tags.outputs.tag-name }}:${{ needs.check-tags.outputs.tag-version }} Image
     runs-on: ubuntu-latest
     needs: [check-tags]
@@ -69,7 +68,7 @@ jobs:
         uses: smartcontractkit/.github/actions/cicd-build-publish-artifacts-go@25645c21796ebb5554693fcc0d312dc88330fbe0 # cicd-build-publish-artifacts-go@0.2.0
         with:
           # general inputs
-          app-name: mercury-pipeline-${{ needs.check-tags.outputs.tag-name }}
+          app-name: chainlink-feeds-${{ needs.check-tags.outputs.tag-name }}
           publish: "true"
           # if ref is empty do to a tag push, it will be an empty string that will checkout the HEAD
           checkout-ref: ${{ inputs.tag }}
@@ -83,7 +82,7 @@ jobs:
           aws-account-number: ${{ secrets.AWS_ACCOUNT_NUMBER_PROD }}
           # gati inputs
           use-gati: "true"
-          aws-role-arn-gati: ${{ secrets.AWS_OIDC_IAM_ROLE_ARN_GATI }}
+          aws-role-arn-gati: ${{ secrets.AWS_OIDC_CHAINLINK_FEEDS_CI_CHANGESET_TOKEN_ISSUER_ROLE_ARN }}
           aws-lambda-url-gati: ${{ secrets.AWS_LAMBDA_URL_GATI }}
           # golang inputs
           go-version-file: go.work
@@ -97,83 +96,3 @@ jobs:
           # docker inputs
           docker-registry: aws
           docker-image-tag: devel
-
-  ci-lint-charts:
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      id-token: write
-      contents: read
-      actions: read
-    steps:
-      - name: ci-lint-charts
-        uses: smartcontractkit/.github/actions/ci-lint-charts@9fd15fe8e698a5e28bfd06b3a91471c56568dcb3 # ci-lint-charts@0.1.1
-        with:
-          # chart testing inputs
-          chart-testing-extra-args: "--lint-conf=lintconf.yaml"
-          # grafana inputs
-          metrics-job-name: ci-lint-charts
-          gc-basic-auth: ${{ secrets.GRAFANA_CLOUD_BASIC_AUTH }}
-          gc-host: ${{ secrets.GRAFANA_CLOUD_HOST }}
-
-  cicd-build-publish-charts:
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      id-token: write
-      contents: read
-      actions: read
-    steps:
-      - name: cicd-build-publish-charts
-        uses: smartcontractkit/.github/actions/cicd-build-publish-charts@9e7cc0779934cae4a9028b8588c9adb64d8ce68c # cicd-build-publish-charts@0.1.0
-        with:
-          # general inputs
-          charts-dir: helm
-          publish: "true"
-          # grafana inputs
-          metrics-job-name: cicd-build-publish-charts
-          gc-basic-auth: ${{ secrets.GRAFANA_CLOUD_BASIC_AUTH }}
-          gc-host: ${{ secrets.GRAFANA_CLOUD_HOST }}
-          # aws inputs
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-role-arn: ${{ secrets.AWS_OIDC_IAM_ROLE_PUBLISH_CHART_PROD_ARN }}
-          aws-account-number: ${{ secrets.AWS_ACCOUNT_NUMBER_PROD }}
-
-  cd-deploy-testnet:
-    name: Deploy Testnet (staging/production)
-    needs: [cicd-build-publish-charts]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Get helm chart version
-        id: helm-chart-version
-        shell: bash
-        run: |
-          version=$(yq '.version' helm/mercury-pipeline/Chart.yaml)
-          echo "version=${version}" | tee -a "${GITHUB_OUTPUT}"
-      - name: Setup GitHub Token
-        id: setup-github-token
-        uses: smartcontractkit/.github/actions/setup-github-token@9e7cc0779934cae4a9028b8588c9adb64d8ce68c # setup-github-token@0.1.0
-        with:
-          aws-role-arn: ${{ secrets.AWS_OIDC_IAM_ROLE_INVOKE_WORKFLOWS_PROD_ARN }}
-          aws-lambda-url: ${{ secrets.GATI_LAMBDA_FUNCTION_URL }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-role-duration-seconds: "1800"
-      - name: Bump helm chart version and create PR
-        uses: smartcontractkit/.github/actions/helm-version-bump-sender@9e7cc0779934cae4a9028b8588c9adb64d8ce68c # helm-version-bump-sender@0.1.0
-        with:
-          app-file-path-pattern: "projects/mercury/apps/mercury-pipeline-testnet.yaml"
-          app-release-name: mercury-pipeline
-          github-token: ${{ steps.setup-github-token.outputs.access-token }}
-          helm-chart-repo: ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/infra-charts
-          helm-chart-repo-update: false
-          helm-chart-version: ${{ steps.helm-chart-version.outputs.version }}
-          pr-draft: false
-          pr-labels: preview-stage,project-mercury
-          release-type: testnet
-          repo-destination-name: smartcontractkit/infra-k8s
-          workflow-file-name: helm-version-bump-receiver.yaml

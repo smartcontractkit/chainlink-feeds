@@ -113,15 +113,13 @@ jobs:
         uses: smartcontractkit/.github/actions/cicd-changesets@c5b65fcfe12a5a14b60b03605748af0b0c6cfbea # cicd-changesets@0.2.0
         with:
           # general inputs
-          # TODO update the name
-          git-user: app-token-issuer-plugins[bot]
-          git-email: app-token-issuer-plugins[bot]@users.noreply.github.com
+          git-user: app-token-issuer-foundations[bot]
+          git-email: app-token-issuer-foundations[bot]@users.noreply.github.com
           pnpm-use-cache: false
           # aws inputs
-          # TODO create GATI and secrets
           aws-region: ${{ secrets.AWS_REGION }}
-          aws-role-arn: ${{ secrets.AWS_ROLE_ARN_GATI_CHANGESETS }}
-          aws-lambda-url: ${{ secrets.AWS_LAMBDA_URL_GATI }}
+          aws-role-arn: ${{ secrets.AWS_OIDC_CHAINLINK_FEEDS_CI_CHANGESET_TOKEN_ISSUER_ROLE_ARN }}
+          aws-lambda-url: ${{ secrets.AWS_FOUNDATIONS_GATI_URL }}
 
   cicd-build-publish-artifacts-release:
     # Call push-tag-release for median@7.7.7
