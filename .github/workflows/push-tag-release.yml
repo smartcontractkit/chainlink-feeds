@@ -83,7 +83,7 @@ jobs:
           # gati inputs
           use-gati: "true"
           aws-role-arn-gati: ${{ secrets.AWS_OIDC_CHAINLINK_FEEDS_CI_CHANGESET_TOKEN_ISSUER_ROLE_ARN }}
-          aws-lambda-url-gati: ${{ secrets.AWS_LAMBDA_URL_GATI }}
+          aws-lambda-url-gati: ${{ secrets.AWS_FOUNDATIONS_GATI_URL }}
           # golang inputs
           go-version-file: go.work
           # goreleaser inputs
