@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      median:
+        specifier: workspace:*
+        version: link:median
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.4.8
@@ -17,6 +21,8 @@ importers:
       semver:
         specifier: ^7.5.4
         version: 7.5.4
+
+  median: {}
 
 packages:
 
