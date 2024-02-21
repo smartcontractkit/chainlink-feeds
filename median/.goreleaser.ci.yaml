@@ -1,7 +1,7 @@
 # Requires GoReleaser Pro
 includes:
   - from_file:
-      path: ./.goreleaser.yaml
+      path: ./median/.goreleaser.yaml
 
 nightly:
   # This is a GoReleaser Pro feature that we use for pre-releases.
