@@ -2,6 +2,7 @@
   "name": "chainlink-feeds",
   "version": "0.1.0",
   "description": "Chainlink feeds plugins",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "ci:changeset:publish": "pnpm changeset publish",
