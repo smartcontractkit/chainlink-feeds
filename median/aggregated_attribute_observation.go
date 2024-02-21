@@ -34,7 +34,6 @@ func aggregate(observations []median.ParsedAttributedObservation) *aggregatedAtt
 	})
 	aggregated.JuelsPerFeeCoin = observations[n/2].JuelsPerFeeCoin
 
-	// compatible with nil case
 	slices.SortFunc(observations, func(a, b median.ParsedAttributedObservation) int {
 		return a.GasPrice.Cmp(b.GasPrice)
 	})
