@@ -1,0 +1,29 @@
+{
+  "name": "chainlink-feeds",
+  "version": "0.1.0",
+  "description": "Chainlink feeds plugins",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "ci:changeset:publish": "pnpm changeset publish",
+    "ci:changeset:version": "pnpm changeset version && pnpm version patch --no-git-tag"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/smartcontractkit/chainlink-feeds.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/smartcontractkit/chainlink-feeds/issues"
+  },
+  "homepage": "https://github.com/smartcontractkit/chainlink-feeds#readme",
+  "dependencies": {
+    "median": "workspace:*"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.4.8",
+    "@changesets/cli": "~2.26.2",
+    "semver": "^7.5.4"
+  }
+}
