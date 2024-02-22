@@ -38,8 +38,8 @@ cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/augustbleeds/libocr v0.0.0-20240215150045-fe2ba71b2f0a h1:G+0vnO8YmDuHmys68k3vBn95XpdJM8H9pHNfyRP9hpo=
-github.com/augustbleeds/libocr v0.0.0-20240215150045-fe2ba71b2f0a/go.mod h1:kC0qmVPUaVkFqGiZMNhmRmjdphuUmeyLEdlWFOQzFWI=
+github.com/augustbleeds/libocr v0.0.0-20240222154448-6050883e1800 h1:eXMkGNE9kfAYyAEBlzjL53ax4klanSS+v4zOhNfuE2M=
+github.com/augustbleeds/libocr v0.0.0-20240222154448-6050883e1800/go.mod h1:kC0qmVPUaVkFqGiZMNhmRmjdphuUmeyLEdlWFOQzFWI=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
@@ -207,8 +207,8 @@ github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjR
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
-github.com/smartcontractkit/chainlink-common v0.1.7-0.20240222153944-9346ac97af8f h1:0EASufnXeL1seVvBzai86W2zzeEQsA9Zj0q6rdA5Pvs=
-github.com/smartcontractkit/chainlink-common v0.1.7-0.20240222153944-9346ac97af8f/go.mod h1:1Ek4TEwK5/y+xmT+6Ly3rjbqJ6hW/zzGh1LFu97qd9s=
+github.com/smartcontractkit/chainlink-common v0.1.7-0.20240222155420-b6579c9a72fe h1:I3rlIsLJnXQikAJ6/TpQR8Z9YC7wrVNwT/oSmsulllE=
+github.com/smartcontractkit/chainlink-common v0.1.7-0.20240222155420-b6579c9a72fe/go.mod h1:/DPJQu8TqFVuydY2N/naL2Mf6319QS9U+AdnaRgOUDw=
 github.com/smartcontractkit/go-plugin v0.0.0-20231003134350-e49dad63b306 h1:ko88+ZznniNJZbZPWAvHQU8SwKAdHngdDZ+pvVgB5ss=
 github.com/smartcontractkit/go-plugin v0.0.0-20231003134350-e49dad63b306/go.mod h1:w1sAEES3g3PuV/RzUrgow20W2uErMly84hhD3um1WL4=
 github.com/smartcontractkit/grpc-proxy v0.0.0-20230731113816-f1be6620749f h1:hgJif132UCdjo8u43i7iPN1/MFnu49hv7lFGFftCHKU=

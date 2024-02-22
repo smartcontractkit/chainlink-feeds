@@ -2,11 +2,11 @@ module github.com/smartcontractkit/chainlink-feeds
 
 go 1.21.3
 
-replace github.com/smartcontractkit/libocr => github.com/augustbleeds/libocr v0.0.0-20240215150045-fe2ba71b2f0a
+replace github.com/smartcontractkit/libocr => github.com/augustbleeds/libocr v0.0.0-20240222154448-6050883e1800
 
 require (
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240222153944-9346ac97af8f
+	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240222155420-b6579c9a72fe
 	github.com/smartcontractkit/libocr v0.0.0-20240112202000-6359502d2ff1
 	github.com/stretchr/testify v1.8.4
 )
