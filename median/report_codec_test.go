@@ -19,18 +19,21 @@ func TestReportCodec(t *testing.T) {
 			Timestamp:       123,
 			Value:           big.NewInt(300),
 			JuelsPerFeeCoin: big.NewInt(100),
+			GasPrice:        big.NewInt(1),
 			Observer:        0,
 		},
 		{
 			Timestamp:       125,
 			Value:           big.NewInt(200),
 			JuelsPerFeeCoin: big.NewInt(110),
+			GasPrice:        big.NewInt(2),
 			Observer:        1,
 		},
 		{
 			Timestamp:       124,
 			Value:           big.NewInt(250),
 			JuelsPerFeeCoin: big.NewInt(90),
+			GasPrice:        big.NewInt(3),
 			Observer:        2,
 		},
 	}
@@ -44,6 +47,7 @@ func TestReportCodec(t *testing.T) {
 			big.NewInt(300),
 		},
 		JuelsPerFeeCoin: big.NewInt(100),
+		GasPriceSubunit: big.NewInt(2),
 	}
 
 	anyEncodedReport := []byte{5, 6, 7, 8}
