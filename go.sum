@@ -207,6 +207,8 @@ github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5g
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/smartcontractkit/chainlink-common v0.1.7-0.20240304152352-db8447c7bf72 h1:54RsazEN/5SEZX3QEXZ6rrHnxviW+1w/jobQISN0FCw=
 github.com/smartcontractkit/chainlink-common v0.1.7-0.20240304152352-db8447c7bf72/go.mod h1:6aXWSEQawX2oZXcPPOdxnEGufAhj7PqPKolXf6ijRGA=
+github.com/smartcontractkit/chainlink-common v0.1.7-0.20240305144022-8640598d7168 h1:tDuRYxxUSE9TUts/+Ca1/SZUppXa8U677f4mPyHcA0I=
+github.com/smartcontractkit/chainlink-common v0.1.7-0.20240305144022-8640598d7168/go.mod h1:6aXWSEQawX2oZXcPPOdxnEGufAhj7PqPKolXf6ijRGA=
 github.com/smartcontractkit/go-plugin v0.0.0-20231003134350-e49dad63b306 h1:ko88+ZznniNJZbZPWAvHQU8SwKAdHngdDZ+pvVgB5ss=
 github.com/smartcontractkit/go-plugin v0.0.0-20231003134350-e49dad63b306/go.mod h1:w1sAEES3g3PuV/RzUrgow20W2uErMly84hhD3um1WL4=
 github.com/smartcontractkit/grpc-proxy v0.0.0-20230731113816-f1be6620749f h1:hgJif132UCdjo8u43i7iPN1/MFnu49hv7lFGFftCHKU=
