@@ -57,7 +57,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 		factory.ReportCodec = provider.ReportCodec()
 	}
 
-	_, err := provider.ChainReader().QueryKeys(ctx, types.NewAndFilter(types.NewAndFilter(), types.NewKeysFilter("key1", "key2", "key3"), types.NewAddressFilter("addr1", "addr2")))
+	_, err := provider.ChainReader().QueryKeys(ctx, types.NewAndFilter(types.NewAndFilter(types.NewAddressFilter("123456", "54321")), types.NewKeysFilter("key1", "key2", "key3"), types.NewAddressFilter("addr1", "addr2")))
 	if err != nil {
 		lggr.Errorw("Failed to test query keys ", err)
 	}
