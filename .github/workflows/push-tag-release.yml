@@ -50,7 +50,7 @@ jobs:
       #     branch-regex: '^(main|release\/.*)'
       - name: Validate and Parse Tag
         id: tag-parse
-        uses: smartcontractkit/.github/actions/check-git-tag-for-monorepo@9e7cc0779934cae4a9028b8588c9adb64d8ce68c # check-git-tag-for-monorepo@0.1.0
+        uses: smartcontractkit/.github/actions/check-git-tag-for-monorepo@ddb44a7f3656223feb3a8a635f06c0e9db189ebc # check-git-tag-for-monorepo@0.1.0
         with:
           tag-ref: ${{ inputs.tag || github.ref_name }}
 
@@ -65,7 +65,7 @@ jobs:
       actions: read
     steps:
       - name: cicd-build-publish-artifacts-release
-        uses: smartcontractkit/.github/actions/cicd-build-publish-artifacts-go@25645c21796ebb5554693fcc0d312dc88330fbe0 # cicd-build-publish-artifacts-go@0.2.0
+        uses: smartcontractkit/.github/actions/cicd-build-publish-artifacts-go@ddb44a7f3656223feb3a8a635f06c0e9db189ebc # cicd-build-publish-artifacts-go@0.2.0
         with:
           # general inputs
           app-name: chainlink-feeds-${{ needs.check-tags.outputs.tag-name }}
