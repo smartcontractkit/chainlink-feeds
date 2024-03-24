@@ -11,6 +11,8 @@ import (
 	"github.com/smartcontractkit/libocr/offchainreporting2plus/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
 )
 
 func TestReportCodec(t *testing.T) {
@@ -59,7 +61,7 @@ func TestReportCodec(t *testing.T) {
 			},
 		}
 
-		encoded, err := rc.BuildReport(anyReports)
+		encoded, err := rc.BuildReport(tests.Context(t), anyReports)
 		require.NoError(t, err)
 		assert.Equal(t, types.Report(anyEncodedReport), encoded)
 	})
@@ -73,10 +75,11 @@ func TestReportCodec(t *testing.T) {
 			},
 		}
 
-		_, err := rc.BuildReport(nil)
+		ctx := tests.Context(t)
+		_, err := rc.BuildReport(ctx, nil)
 		assert.Error(t, err)
 
-		_, err = rc.BuildReport([]median.ParsedAttributedObservation{})
+		_, err = rc.BuildReport(ctx, []median.ParsedAttributedObservation{})
 		assert.Error(t, err)
 	})
 
@@ -90,7 +93,7 @@ func TestReportCodec(t *testing.T) {
 			},
 		}
 
-		_, err := rc.BuildReport(anyReports)
+		_, err := rc.BuildReport(tests.Context(t), anyReports)
 		assert.Equal(t, anyError, err)
 	})
 
@@ -103,7 +106,7 @@ func TestReportCodec(t *testing.T) {
 			},
 		}
 
-		medianVal, err := rc.MedianFromReport(anyEncodedReport)
+		medianVal, err := rc.MedianFromReport(tests.Context(t), anyEncodedReport)
 		require.NoError(t, err)
 		assert.Equal(t, big.NewInt(250), medianVal)
 	})
@@ -118,7 +121,7 @@ func TestReportCodec(t *testing.T) {
 			},
 		}
 
-		_, err := rc.MedianFromReport(anyEncodedReport)
+		_, err := rc.MedianFromReport(tests.Context(t), anyEncodedReport)
 		assert.Equal(t, anyError, err)
 	})
 
@@ -133,7 +136,7 @@ func TestReportCodec(t *testing.T) {
 			},
 		}
 
-		length, err := rc.MaxReportLength(anyN)
+		length, err := rc.MaxReportLength(tests.Context(t), anyN)
 		require.NoError(t, err)
 		assert.Equal(t, anyLen, length)
 	})
@@ -147,7 +150,7 @@ func TestReportCodec(t *testing.T) {
 		},
 		}
 
-		_, err := rc.MaxReportLength(10)
+		_, err := rc.MaxReportLength(tests.Context(t), 10)
 		assert.Equal(t, anyError, err)
 	})
 }
