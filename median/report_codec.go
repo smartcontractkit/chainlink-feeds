@@ -19,6 +19,8 @@ type reportCodec struct {
 
 var _ median.ReportCodec = &reportCodec{}
 
+// if a node is reporting the gas price, it should also include this in its
+// build report. so this should be incorporated in any change with the node gas price
 func (r *reportCodec) BuildReport(observations []median.ParsedAttributedObservation) (ocrtypes.Report, error) {
 	if len(observations) == 0 {
 		return nil, fmt.Errorf("cannot build report from empty attributed observations")
