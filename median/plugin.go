@@ -32,8 +32,10 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
 
 	factory := median.NumericalMedianFactory{
-		DataSource:                dataSource,
-		JuelsPerFeeCoinDataSource: juelsPerFeeCoin,
+		DataSource:                           dataSource,
+		JuelsPerFeeCoinDataSource:            juelsPerFeeCoin,
+		GasPriceSubunitsDataSource:           &ZeroDataSource{},
+		IncludeGasPriceSubunitsInObservation: false,
 		Logger: logger.NewOCRWrapper(lggr, true, func(msg string) {
 			ctx, cancelFn := p.stop.NewCtx()
 			defer cancelFn()
@@ -62,6 +64,12 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	p.SubService(s)
 
 	return s, nil
+}
+
+type ZeroDataSource struct{}
+
+func (d *ZeroDataSource) Observe(ctx context.Context, reportTimestamp ocrtypes.ReportTimestamp) (*big.Int, error) {
+	return new(big.Int), nil
 }
 
 type reportingPluginFactoryService struct {
