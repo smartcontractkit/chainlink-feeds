@@ -37,7 +37,7 @@ jobs:
       release: ${{ steps.tag-parse.outputs.release }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
         with:
           fetch-depth: 0
           ref: ${{ inputs.tag }} # This will evaluate to "" in the case of a tag push
