@@ -7,7 +7,7 @@ replace github.com/smartcontractkit/libocr => github.com/augustbleeds/libocr v0.
 require (
 	github.com/hashicorp/go-plugin v1.6.0
 	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240327133125-eed636b9a6df
-	github.com/smartcontractkit/libocr v0.0.0-20240326191951-2bbe9382d052
+	github.com/smartcontractkit/libocr v0.0.0-20240419185742-fd3cab206b2c
 	github.com/stretchr/testify v1.9.0
 )
 
