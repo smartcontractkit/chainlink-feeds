@@ -36,10 +36,10 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	// Once all chainlink nodes in DONs have libocr version >= fd3cab206b2c
 	// this check and IncludeGasPriceSubunitsInObservation field can be removed
 
-	_, ok := gasPriceSubunits.(*ZeroDataSource)
+	_, isZeroDataSource := gasPriceSubunits.(*ZeroDataSource)
 
 	var includeGasPriceSubunitsInObservation bool
-	if ok {
+	if isZeroDataSource {
 		includeGasPriceSubunitsInObservation = false
 	} else {
 		includeGasPriceSubunitsInObservation = true
