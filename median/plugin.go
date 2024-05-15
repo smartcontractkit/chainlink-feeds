@@ -26,16 +26,30 @@ func NewPlugin(lggr logger.Logger) *Plugin {
 	return &Plugin{Plugin: loop.Plugin{Logger: lggr}, stop: make(services.StopChan)}
 }
 
-func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, dataSource, juelsPerFeeCoin, gasPrice median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
+func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
 
+	// Setting includeGasPriceSubunitsInObservation properly ensures we do not break libocr codec
+	// by including gasPriceSubunits in the observation when not allowed
+	// Once all chainlink nodes in DONs have libocr version >= fd3cab206b2c
+	// this check and IncludeGasPriceSubunitsInObservation field can be removed
+
+	_, ok := gasPriceSubunits.(*ZeroDataSource)
+
+	var includeGasPriceSubunitsInObservation bool
+	if ok {
+		includeGasPriceSubunitsInObservation = false
+	} else {
+		includeGasPriceSubunitsInObservation = true
+	}
+
 	factory := median.NumericalMedianFactory{
 		DataSource:                           dataSource,
 		JuelsPerFeeCoinDataSource:            juelsPerFeeCoin,
-		GasPriceSubunitsDataSource:           &ZeroDataSource{},
-		IncludeGasPriceSubunitsInObservation: false,
+		GasPriceSubunitsDataSource:           gasPriceSubunits,
+		IncludeGasPriceSubunitsInObservation: includeGasPriceSubunitsInObservation,
 		Logger: logger.NewOCRWrapper(lggr, true, func(msg string) {
 			ctx, cancelFn := p.stop.NewCtx()
 			defer cancelFn()
