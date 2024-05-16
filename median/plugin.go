@@ -38,12 +38,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 
 	_, isZeroDataSource := gasPriceSubunits.(*ZeroDataSource)
 
-	var includeGasPriceSubunitsInObservation bool
-	if isZeroDataSource {
-		includeGasPriceSubunitsInObservation = false
-	} else {
-		includeGasPriceSubunitsInObservation = true
-	}
+	includeGasPriceSubunitsInObservation := !isZeroDataSource
 
 	factory := median.NumericalMedianFactory{
 		DataSource:                           dataSource,
