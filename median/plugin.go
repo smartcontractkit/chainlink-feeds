@@ -31,10 +31,9 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
 
-	// Setting includeGasPriceSubunitsInObservation properly ensures we do not break libocr codec
-	// by including gasPriceSubunits in the observation when not allowed
-	// Once all chainlink nodes in DONs have libocr version >= fd3cab206b2c
-	// this check and IncludeGasPriceSubunitsInObservation field can be removed
+	// We may omit gas price in observation to maintain backwards compability in libocr (with older nodes).
+	// Once all chainlink nodes have updated to libocr version >= fd3cab206b2c
+	// the IncludeGasPriceSubunitsInObservation field can be removed
 
 	_, isZeroDataSource := gasPriceSubunits.(*ZeroDataSource)
 
