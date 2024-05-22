@@ -16,22 +16,25 @@ import (
 func TestReportCodec(t *testing.T) {
 	anyReports := []median.ParsedAttributedObservation{
 		{
-			Timestamp:       123,
-			Value:           big.NewInt(300),
-			JuelsPerFeeCoin: big.NewInt(100),
-			Observer:        0,
+			Timestamp:        123,
+			Value:            big.NewInt(300),
+			JuelsPerFeeCoin:  big.NewInt(100),
+			GasPriceSubunits: big.NewInt(0),
+			Observer:         0,
 		},
 		{
-			Timestamp:       125,
-			Value:           big.NewInt(200),
-			JuelsPerFeeCoin: big.NewInt(110),
-			Observer:        1,
+			Timestamp:        125,
+			Value:            big.NewInt(200),
+			JuelsPerFeeCoin:  big.NewInt(110),
+			GasPriceSubunits: big.NewInt(1),
+			Observer:         1,
 		},
 		{
-			Timestamp:       124,
-			Value:           big.NewInt(250),
-			JuelsPerFeeCoin: big.NewInt(90),
-			Observer:        2,
+			Timestamp:        124,
+			Value:            big.NewInt(250),
+			JuelsPerFeeCoin:  big.NewInt(90),
+			GasPriceSubunits: big.NewInt(2),
+			Observer:         2,
 		},
 	}
 
@@ -44,6 +47,7 @@ func TestReportCodec(t *testing.T) {
 			big.NewInt(300),
 		},
 		JuelsPerFeeCoin: big.NewInt(100),
+		GasPriceSubunit: big.NewInt(1),
 	}
 
 	anyEncodedReport := []byte{5, 6, 7, 8}

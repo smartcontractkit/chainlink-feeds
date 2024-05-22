@@ -14,6 +14,7 @@ type aggregatedAttributedObservation struct {
 	Observers       [32]commontypes.OracleID
 	Observations    []*big.Int
 	JuelsPerFeeCoin *big.Int
+	GasPriceSubunit *big.Int
 }
 
 func aggregate(observations []median.ParsedAttributedObservation) *aggregatedAttributedObservation {
@@ -32,6 +33,11 @@ func aggregate(observations []median.ParsedAttributedObservation) *aggregatedAtt
 		return a.JuelsPerFeeCoin.Cmp(b.JuelsPerFeeCoin)
 	})
 	aggregated.JuelsPerFeeCoin = observations[n/2].JuelsPerFeeCoin
+
+	slices.SortFunc(observations, func(a, b median.ParsedAttributedObservation) int {
+		return a.GasPriceSubunits.Cmp(b.GasPriceSubunits)
+	})
+	aggregated.GasPriceSubunit = observations[n/2].GasPriceSubunits
 
 	slices.SortFunc(observations, func(a, b median.ParsedAttributedObservation) int {
 		return a.Value.Cmp(b.Value)
