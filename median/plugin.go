@@ -31,7 +31,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
 
-	// We omit gas price in observation to maintain backwards compability in libocr (with older nodes).
+	// We omit gas price in observation to maintain backwards compatibility in libocr (with older nodes).
 	// Once all chainlink nodes have updated to libocr version >= fd3cab206b2c
 	// the IncludeGasPriceSubunitsInObservation field can be removed
 
