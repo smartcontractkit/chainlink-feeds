@@ -100,9 +100,9 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 	return map[string]error{r.Name(): r.Healthy()}
 }
 
-// chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
+// chainReaderContract adapts a [types.ContractReader] to [median.MedianContract].
 type chainReaderContract struct {
-	chainReader types.ChainReader
+	chainReader types.ContractReader
 	lggr        logger.Logger
 }
 
@@ -123,7 +123,13 @@ type latestRoundRequested struct {
 func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+	binding := types.BoundContract{
+		Address:  "TODO",
+		Contract: contractName,
+		Method:   "LatestTransmissionDetails",
+	}
+
+	err = c.chainReader.GetLatestValue(ctx, binding, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -146,7 +152,13 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
+	binding := types.BoundContract{
+		Address:  "TODO",
+		Contract: contractName,
+		Method:   "LatestRoundRequested",
+	}
+
+	err = c.chainReader.GetLatestValue(ctx, binding, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
