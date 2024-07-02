@@ -13,6 +13,7 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/loop"
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
+	"github.com/smartcontractkit/chainlink-common/pkg/types/query/primitives"
 )
 
 const contractName = "median"
@@ -123,7 +124,7 @@ type latestRoundRequested struct {
 func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", primitives.Finalized, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -146,7 +147,7 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
+	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", primitives.Finalized, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
