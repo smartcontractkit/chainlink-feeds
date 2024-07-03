@@ -111,8 +111,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ci-sonarqube
-        uses: smartcontractkit/.github/actions/ci-sonarqube-go@3e11dbc45e4c8b18dd996fb417ccf22056176388 # ci-sonarqube-go@0.1.0
+        uses: smartcontractkit/.github/actions/ci-sonarqube-go@50e632d346022462870a85ea19e6bc8b0c0a92bc # ci-sonarqube-go@0.1.1
         with:
+          include-lint: "true"
           # grafana inputs
           metrics-job-name: ci-sonarqube
           gc-basic-auth: ${{ secrets.GRAFANA_INTERNAL_BASIC_AUTH }}
