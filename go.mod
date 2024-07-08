@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240522203001-10ea0211efd7
+	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240708121854-68161b704058
 	github.com/smartcontractkit/libocr v0.0.0-20240419185742-fd3cab206b2c
 	github.com/stretchr/testify v1.9.0
 )
@@ -64,7 +64,6 @@ require (
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

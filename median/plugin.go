@@ -13,6 +13,7 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/loop"
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
+	"github.com/smartcontractkit/chainlink-common/pkg/types/query/primitives"
 )
 
 const contractName = "median"
@@ -55,7 +56,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &chainReaderContract{chainReader: cr, lggr: lggr}
+		factory.ContractTransmitter = &contractReaderContract{contractReader: cr, lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -100,10 +101,10 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 	return map[string]error{r.Name(): r.Healthy()}
 }
 
-// chainReaderContract adapts a [types.ChainReader] to [median.MedianContract].
-type chainReaderContract struct {
-	chainReader types.ChainReader
-	lggr        logger.Logger
+// contractReaderContract adapts a [types.ContractReader] to [median.MedianContract].
+type contractReaderContract struct {
+	contractReader types.ContractReader
+	lggr           logger.Logger
 }
 
 type latestTransmissionDetailsResponse struct {
@@ -120,10 +121,10 @@ type latestRoundRequested struct {
 	Round        uint8
 }
 
-func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
+func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -134,7 +135,7 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 		c.lggr.Warn("LatestTransmissionDetails not found", "err", err)
 	}
 
-	// Depending on if there is a LatestAnswer or not, and the implementation of the ChainReader,
+	// Depending on if there is a LatestAnswer or not, and the implementation of the ContractReader,
 	// it's possible that this will be unset. The desired behaviour in that case is to have a zero value.
 	if resp.LatestAnswer == nil {
 		resp.LatestAnswer = new(big.Int)
@@ -143,10 +144,10 @@ func (c *chainReaderContract) LatestTransmissionDetails(ctx context.Context) (co
 	return resp.ConfigDigest, resp.Epoch, resp.Round, resp.LatestAnswer, resp.LatestTimestamp, nil
 }
 
-func (c *chainReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
+func (c *contractReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.chainReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
