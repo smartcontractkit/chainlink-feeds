@@ -1,5 +1,5 @@
 {
-  "name": "chainlink-feeds",
+  "name": "@chainlink/feeds",
   "version": "0.1.0",
   "description": "Chainlink feeds plugins",
   "private": true,
