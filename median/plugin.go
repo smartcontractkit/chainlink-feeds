@@ -124,7 +124,12 @@ type latestRoundRequested struct {
 func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.contractReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", primitives.Unconfirmed, nil, &resp)
+	binding := types.BoundContract{
+		Address:  "TODO",
+		Contract: contractName,
+	}
+
+	err = c.contractReader.GetLatestValue(ctx, binding.ReadKey("LatestTransmissionDetails"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -147,7 +152,12 @@ func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) 
 func (c *contractReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.contractReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", primitives.Unconfirmed, nil, &resp)
+	binding := types.BoundContract{
+		Address:  "TODO",
+		Contract: contractName,
+	}
+
+	err = c.contractReader.GetLatestValue(ctx, binding.ReadKey("LatestRoundRequested"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
