@@ -125,11 +125,11 @@ func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) 
 	var resp latestTransmissionDetailsResponse
 
 	binding := types.BoundContract{
-		Address:  "TODO",
-		Contract: contractName,
+		Address: "TODO",
+		Name:    contractName,
 	}
 
-	err = c.contractReader.GetLatestValue(ctx, binding.ReadKey("LatestTransmissionDetails"), primitives.Unconfirmed, nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, binding.ReadIdentifier("LatestTransmissionDetails"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -153,11 +153,11 @@ func (c *contractReaderContract) LatestRoundRequested(ctx context.Context, lookb
 	var resp latestRoundRequested
 
 	binding := types.BoundContract{
-		Address:  "TODO",
-		Contract: contractName,
+		Address: "TODO",
+		Name:    contractName,
 	}
 
-	err = c.contractReader.GetLatestValue(ctx, binding.ReadKey("LatestRoundRequested"), primitives.Unconfirmed, nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, binding.ReadIdentifier("LatestRoundRequested"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
