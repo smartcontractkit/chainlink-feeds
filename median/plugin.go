@@ -27,7 +27,7 @@ func NewPlugin(lggr logger.Logger) *Plugin {
 	return &Plugin{Plugin: loop.Plugin{Logger: lggr}, stop: make(services.StopChan)}
 }
 
-func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractAddr string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
+func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
@@ -57,12 +57,12 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 
 	if cr := provider.ChainReader(); cr != nil {
 		if err := provider.ChainReader().Bind(ctx, []types.BoundContract{
-			{Address: contractAddr, Name: contractAddr},
+			{Address: contractID, Name: contractName},
 		}); err != nil {
 			return nil, err
 		}
 
-		factory.ContractTransmitter = &contractReaderContract{contractAddr: contractAddr, contractReader: cr, lggr: lggr}
+		factory.ContractTransmitter = &contractReaderContract{contractID: contractID, contractReader: cr, lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -109,7 +109,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 
 // contractReaderContract adapts a [types.ContractReader] to [median.MedianContract].
 type contractReaderContract struct {
-	contractAddr   string
+	contractID     string
 	contractReader types.ContractReader
 	lggr           logger.Logger
 }
@@ -132,7 +132,7 @@ func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) 
 	var resp latestTransmissionDetailsResponse
 
 	binding := types.BoundContract{
-		Address: c.contractAddr,
+		Address: c.contractID,
 		Name:    contractName,
 	}
 
@@ -160,7 +160,7 @@ func (c *contractReaderContract) LatestRoundRequested(ctx context.Context, lookb
 	var resp latestRoundRequested
 
 	binding := types.BoundContract{
-		Address: c.contractAddr,
+		Address: c.contractID,
 		Name:    contractName,
 	}
 
