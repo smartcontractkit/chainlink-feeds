@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/smartcontractkit/chainlink-common v0.2.2-0.20240802183453-a0e0a638468c
+	github.com/smartcontractkit/chainlink-common v0.2.2-0.20240807142535-07a9beb0ce06
 	github.com/smartcontractkit/libocr v0.0.0-20240419185742-fd3cab206b2c
 	github.com/stretchr/testify v1.9.0
 )
