@@ -27,7 +27,7 @@ func NewPlugin(lggr logger.Logger) *Plugin {
 	return &Plugin{Plugin: loop.Plugin{Logger: lggr}, stop: make(services.StopChan)}
 }
 
-func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
+func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
@@ -56,7 +56,13 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	}
 
 	if cr := provider.ChainReader(); cr != nil {
-		factory.ContractTransmitter = &contractReaderContract{contractReader: cr, lggr: lggr}
+		if err := provider.ChainReader().Bind(ctx, []types.BoundContract{
+			{Address: contractID, Name: contractName},
+		}); err != nil {
+			return nil, err
+		}
+
+		factory.ContractTransmitter = &contractReaderContract{binding: types.BoundContract{Address: contractID, Name: contractName}, contractReader: cr, lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -103,6 +109,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 
 // contractReaderContract adapts a [types.ContractReader] to [median.MedianContract].
 type contractReaderContract struct {
+	binding        types.BoundContract
 	contractReader types.ContractReader
 	lggr           logger.Logger
 }
@@ -124,7 +131,7 @@ type latestRoundRequested struct {
 func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	err = c.contractReader.GetLatestValue(ctx, contractName, "LatestTransmissionDetails", primitives.Unconfirmed, nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, c.binding.ReadIdentifier("LatestTransmissionDetails"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -147,7 +154,7 @@ func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) 
 func (c *contractReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	err = c.contractReader.GetLatestValue(ctx, contractName, "LatestRoundRequested", primitives.Unconfirmed, nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, c.binding.ReadIdentifier("LatestRoundRequested"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
