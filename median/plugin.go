@@ -62,7 +62,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 			return nil, err
 		}
 
-		factory.ContractTransmitter = &contractReaderContract{contractID: contractID, contractReader: cr, lggr: lggr}
+		factory.ContractTransmitter = &contractReaderContract{binding: types.BoundContract{Address: contractID, Name: contractName}, contractReader: cr, lggr: lggr}
 	} else {
 		factory.ContractTransmitter = provider.MedianContract()
 	}
@@ -109,7 +109,7 @@ func (r *reportingPluginFactoryService) HealthReport() map[string]error {
 
 // contractReaderContract adapts a [types.ContractReader] to [median.MedianContract].
 type contractReaderContract struct {
-	contractID     string
+	binding        types.BoundContract
 	contractReader types.ContractReader
 	lggr           logger.Logger
 }
@@ -131,12 +131,7 @@ type latestRoundRequested struct {
 func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, latestAnswer *big.Int, latestTimestamp time.Time, err error) {
 	var resp latestTransmissionDetailsResponse
 
-	binding := types.BoundContract{
-		Address: c.contractID,
-		Name:    contractName,
-	}
-
-	err = c.contractReader.GetLatestValue(ctx, binding.ReadIdentifier("LatestTransmissionDetails"), primitives.Unconfirmed, nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, c.binding.ReadIdentifier("LatestTransmissionDetails"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
@@ -159,12 +154,7 @@ func (c *contractReaderContract) LatestTransmissionDetails(ctx context.Context) 
 func (c *contractReaderContract) LatestRoundRequested(ctx context.Context, lookback time.Duration) (configDigest ocrtypes.ConfigDigest, epoch uint32, round uint8, err error) {
 	var resp latestRoundRequested
 
-	binding := types.BoundContract{
-		Address: c.contractID,
-		Name:    contractName,
-	}
-
-	err = c.contractReader.GetLatestValue(ctx, binding.ReadIdentifier("LatestRoundRequested"), primitives.Unconfirmed, nil, &resp)
+	err = c.contractReader.GetLatestValue(ctx, c.binding.ReadIdentifier("LatestRoundRequested"), primitives.Unconfirmed, nil, &resp)
 	if err != nil {
 		if !errors.Is(err, types.ErrNotFound) {
 			return
