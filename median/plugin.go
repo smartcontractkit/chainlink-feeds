@@ -55,8 +55,8 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 		OnchainConfigCodec: provider.OnchainConfigCodec(),
 	}
 
-	if cr := provider.ChainReader(); cr != nil {
-		if err := provider.ChainReader().Bind(ctx, []types.BoundContract{
+	if cr := provider.ContractReader(); cr != nil {
+		if err := provider.ContractReader().Bind(ctx, []types.BoundContract{
 			{Address: contractID, Name: contractName},
 		}); err != nil {
 			return nil, err
