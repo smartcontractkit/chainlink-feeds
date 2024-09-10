@@ -46,9 +46,9 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 		GasPriceSubunitsDataSource:           gasPriceSubunits,
 		IncludeGasPriceSubunitsInObservation: includeGasPriceSubunitsInObservation,
 		Logger: logger.NewOCRWrapper(lggr, true, func(msg string) {
-			ctx, cancelFn := p.stop.NewCtx()
+			newCtx, cancelFn := p.stop.NewCtx()
 			defer cancelFn()
-			if err := errorLog.SaveError(ctx, msg); err != nil {
+			if err := errorLog.SaveError(newCtx, msg); err != nil {
 				lggr.Errorw("Unable to save error", "err", msg)
 			}
 		}),
