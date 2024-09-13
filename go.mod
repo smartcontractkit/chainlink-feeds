@@ -1,3 +1,5 @@
+module github.com/smartcontractkit/chainlink-feeds
+
 go 1.22
 
 toolchain go1.22.6
@@ -83,8 +85,3 @@ require (
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// until merged upstream: https://github.com/mwitkow/grpc-proxy/pull/69
-replace github.com/mwitkow/grpc-proxy => github.com/smartcontractkit/grpc-proxy v0.0.0-20230731113816-f1be6620749f
-
-module github.com/smartcontractkit/chainlink-feeds
