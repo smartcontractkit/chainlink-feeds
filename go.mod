@@ -6,7 +6,7 @@ toolchain go1.22.6
 
 require (
 	github.com/hashicorp/go-plugin v1.6.2-0.20240829161738-06afb6d7ae99
-	github.com/smartcontractkit/chainlink-common v0.2.2-0.20240910115520-d5c8c953d2c3
+	github.com/smartcontractkit/chainlink-common v0.2.2-0.20240913100429-aa383c8c4694
 	github.com/smartcontractkit/libocr v0.0.0-20240419185742-fd3cab206b2c
 	github.com/stretchr/testify v1.9.0
 )
