@@ -13,6 +13,7 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/loop"
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
+	"github.com/smartcontractkit/chainlink-common/pkg/types/core"
 	"github.com/smartcontractkit/chainlink-common/pkg/types/query/primitives"
 )
 
@@ -27,15 +28,13 @@ func NewPlugin(lggr logger.Logger) *Plugin {
 	return &Plugin{Plugin: loop.Plugin{Logger: lggr}, stop: make(services.StopChan)}
 }
 
-type Option func(*median.NumericalMedianFactory)
-
-func WithDeviationFunc(df median.DeviationFunc) Option {
+func WithDeviationFunc(df median.DeviationFunc) core.PluginMedianOption {
 	return func(nmf *median.NumericalMedianFactory) {
 		nmf.DeviationFunc = df
 	}
 }
 
-func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog, opts ...Option) (loop.ReportingPluginFactory, error) {
+func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog, opts ...core.PluginMedianOption) (loop.ReportingPluginFactory, error) {
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
