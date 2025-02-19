@@ -27,7 +27,15 @@ func NewPlugin(lggr logger.Logger) *Plugin {
 	return &Plugin{Plugin: loop.Plugin{Logger: lggr}, stop: make(services.StopChan)}
 }
 
-func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
+type Option func(*median.NumericalMedianFactory)
+
+func WithDeviationFunc(df median.DeviationFunc) Option {
+	return func(nmf *median.NumericalMedianFactory) {
+		nmf.DeviationFunc = df
+	}
+}
+
+func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog, opts ...Option) (loop.ReportingPluginFactory, error) {
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
@@ -53,6 +61,10 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 			}
 		}),
 		OnchainConfigCodec: provider.OnchainConfigCodec(),
+	}
+
+	for _, opt := range opts {
+		opt(&factory)
 	}
 
 	if cr := provider.ContractReader(); cr != nil {
