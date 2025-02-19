@@ -3,6 +3,7 @@ package median
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -27,7 +28,7 @@ func NewPlugin(lggr logger.Logger) *Plugin {
 	return &Plugin{Plugin: loop.Plugin{Logger: lggr}, stop: make(services.StopChan)}
 }
 
-func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog) (loop.ReportingPluginFactory, error) {
+func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProvider, contractID string, dataSource, juelsPerFeeCoin, gasPriceSubunits median.DataSource, errorLog loop.ErrorLog, deviationFuncDefinition map[string]any) (loop.ReportingPluginFactory, error) {
 	var ctxVals loop.ContextValues
 	ctxVals.SetValues(ctx)
 	lggr := logger.With(p.Logger, ctxVals.Args()...)
@@ -39,6 +40,15 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	_, isZeroDataSource := gasPriceSubunits.(*ZeroDataSource)
 
 	includeGasPriceSubunitsInObservation := !isZeroDataSource
+
+	var deviationFunc median.DeviationFunc
+	if deviationFuncDefinition != nil {
+		var err error
+		deviationFunc, err = NewDeviationFunc(lggr, deviationFuncDefinition)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create deviation function: %w", err)
+		}
+	}
 
 	factory := median.NumericalMedianFactory{
 		DataSource:                           dataSource,
@@ -53,6 +63,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 			}
 		}),
 		OnchainConfigCodec: provider.OnchainConfigCodec(),
+		DeviationFunc:      deviationFunc,
 	}
 
 	if cr := provider.ContractReader(); cr != nil {
