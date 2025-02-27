@@ -42,7 +42,7 @@ func (p *Plugin) NewMedianFactory(ctx context.Context, provider types.MedianProv
 	includeGasPriceSubunitsInObservation := !isZeroDataSource
 
 	var deviationFunc median.DeviationFunc
-	if len(deviationFuncDefinition) == 0 {
+	if len(deviationFuncDefinition) > 0 {
 		var err error
 		deviationFunc, err = NewDeviationFunc(lggr, deviationFuncDefinition)
 		if err != nil {
